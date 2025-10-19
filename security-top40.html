@@ -1,0 +1,2830 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_fbf48a80774e70082c47684d543a652f {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+<link rel="stylesheet" href="https://unpkg.com/leaflet-sidebar-v2/css/leaflet-sidebar.min.css"/>
+<style>
+  .leaflet-sidebar { z-index: 1000; }
+  .folium-map { width: 100vw !important; height: 91vh !important; }
+  /* toggle styling */
+  .top-right-toggle { position: absolute; top: 10px; right: 10px; z-index: 1002; }
+  .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+  .switch input { display:none; }
+  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+  .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+  input:checked + .slider { background-color: #2196F3; }
+  input:checked + .slider:before { transform: translateX(26px); }
+  .toggle-label { font-size: 12px; display:block; text-align:center; margin-bottom:4px; }
+</style>
+<div id="sidebar" class="leaflet-sidebar collapsed">
+    <div class="leaflet-sidebar-tabs">
+        <ul role="tablist">
+            <li><a href="#home" role="tab"><span class="fa fa-info"></span></a></li>
+        </ul>
+    </div>
+    <div class="leaflet-sidebar-content">
+        <div class="leaflet-sidebar-pane" id="home">
+            <h1 id="sidebar-city-title"></h1>
+            <div id="sidebar-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- top-right toggles -->
+<div class="top-right-toggle">
+  <div style="margin-bottom:6px;">
+    <span class="toggle-label">Rent city center / outskirts</span>
+    <label class="switch">
+      <input type="checkbox" id="earningsToggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+  <div>
+    <span class="toggle-label">Hide non-public salaries</span>
+    <label class="switch">
+      <input type="checkbox" id="hideNoPublicToggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+</div>
+    
+<script src="https://unpkg.com/leaflet-sidebar-v2/js/leaflet-sidebar.min.js"></script>
+<script>
+var sidebar = null;
+var cityInfo = {"ZURICH / Switzerland": {"city": "ZURICH", "earnings": "1242.55", "institution": "ETH Zurich", "earnoutside": "1626.71", "citations": 185, "salarynet": "5,242.60", "salarytype": "SALARY", "lifecost": "1,602.30", "rentin": "2,397.75", "rentout": "2,013.59", "costlife": "4,000.05", "sources": ["https://ethz.ch/en/the-eth-zurich/working-teaching-and-research/welcome-center/employment-contract-and-salary/salary.html", "https://jobs.ethz.ch/job/view/10921"], "salaryacc": 1}, "SAARBRUECKEN / Germany": {"city": "SAARBRUECKEN", "earnings": "1495.84", "institution": "CISPA Helmholtz Center", "earnoutside": "1541.84", "citations": 437, "salarynet": "2,879.34", "salarytype": "SALARY", "lifecost": "883.50", "rentin": "500.00", "rentout": "454.00", "costlife": "1,383.50", "sources": ["https://oeffentlicher-dienst.info/c/t/rechner/tvoed/bund?id=tvoed-bund-2025&g=E_13&s=1&zv=VBL&z=100&zulage=&stj=2025&stkl=1&lst4f=&r=0&zkf=0&pvk=0&kk=17.05%25"], "salaryacc": 1}, "SAARBRUCKEN / Germany": {"city": "SAARBRUCKEN", "earnings": "1495.84", "institution": "Saarland University", "earnoutside": "1541.84", "citations": 4, "salarynet": "2,879.34", "salarytype": "SALARY", "lifecost": "883.50", "rentin": "500.00", "rentout": "454.00", "costlife": "1,383.50", "sources": ["https://www.uni-saarland.de/en/page/working/the-university-as-an-employer/what-we-offer.html", "https://oeffentlicher-dienst.info/c/t/rechner/tvoed/bund?id=tvoed-bund-2025&g=E_13&s=1&zv=VBL&z=100&zulage=&stj=2025&stkl=1&lst4f=&r=0&zkf=0&pvk=0&kk=17.05%25"], "salaryacc": 3}, "BOCHUM / Germany": {"city": "BOCHUM", "earnings": "1214.34", "institution": "Max Planck Society", "earnoutside": "1463.09", "citations": 165, "salarynet": "2,879.34", "salarytype": "SALARY", "lifecost": "985.00", "rentin": "680.00", "rentout": "431.25", "costlife": "1,665.00", "sources": ["https://oeffentlicher-dienst.info/c/t/rechner/tvoed/bund?id=tvoed-bund-2025&g=E_13&s=1&zv=VBL&z=100&zulage=&stj=2025&stkl=1&lst4f=&r=0&zkf=0&pvk=0&kk=17.05%25"], "salaryacc": 1}, "AACHEN / Germany": {"city": "AACHEN", "earnings": "1163.84", "institution": "RWTH Aachen University", "earnoutside": "1338.84", "citations": 6, "salarynet": "2,879.34", "salarytype": "SALARY", "lifecost": "960.50", "rentin": "755.00", "rentout": "580.00", "costlife": "1,715.50", "sources": ["https://www.cats.rwth-aachen.de/cms/cats/der-lehrstuhl/stellenangebote/~qspt/stelleninfos/?lidx=1"], "salaryacc": 1}, "Klosterneuburg / Austria": {"city": "Klosterneuburg", "earnings": "1184.35", "institution": "IST Austria", "earnoutside": "1293.44", "citations": 12, "salarynet": "3,050.95", "salarytype": "SALARY", "lifecost": "1,066.60", "rentin": "800.00", "rentout": "690.91", "costlife": "1,866.60", "sources": ["https://phd.pages.ist.ac.at/funding-and-awards/", "https://www.myscience.at/en/working/salary/phd_salaries", "https://www.kollektivvertrag.at/kv?variant-group-id=universitaeten&variant-id=SI-2831_de&topic-id=1", "https://bruttonetto.finanzrechner.at/en/"], "salaryacc": 1}, "WURZBURG / Germany": {"city": "WURZBURG", "earnings": "1120.44", "institution": "University of W\u00fcrzburg", "earnoutside": "1287.94", "citations": 14, "salarynet": "2,879.34", "salarytype": "SALARY", "lifecost": "1,001.40", "rentin": "757.50", "rentout": "590.00", "costlife": "1,758.90", "sources": ["https://www.uni-wuerzburg.de/en/international/studying-in-wuerzburg/degree-programmes/application/doctorate-phd/", "https://www.uni-wuerzburg.de/karriere/vorteile/"], "salaryacc": 2}, "Lausanne / Switzerland": {"city": "Lausanne", "earnings": "901.17", "institution": "EPFL", "earnoutside": "1206.5", "citations": 94, "salarynet": "4,097.03", "salarytype": "SALARY", "lifecost": "1,558.80", "rentin": "1,637.06", "rentout": "1,331.73", "costlife": "3,195.86", "sources": ["https://www.epfl.ch/campus/services/human-resources/basic-starting-salary-of-doctoral-assistants-and-postdocs/"], "salaryacc": 1}, "L\u00fcbeck / Germany": {"city": "L\u00fcbeck", "earnings": "1204.34", "institution": "University of L\u00fcbeck", "earnoutside": "1194.34", "citations": 21, "salarynet": "2,879.34", "salarytype": "SALARY", "lifecost": "985.00", "rentin": "690.00", "rentout": "700.00", "costlife": "1,675.00", "sources": ["https://www.uni-luebeck.de/en/university-education/international/international-students/doctorate/financial-aid.html", "https://www.uni-luebeck.de/en/doctorate/service/scholarshipsfellowships.html"], "salaryacc": 3}, "GRAZ / Austria": {"city": "GRAZ", "earnings": "970.1", "institution": "Graz University of Technology", "earnoutside": "1065.74", "citations": 80, "salarynet": "2,747.83", "salarytype": "SALARY", "lifecost": "1,089.40", "rentin": "688.33", "rentout": "592.69", "costlife": "1,777.73", "sources": ["https://jobs.tugraz.at/en/jobs/aaea81b6-82a5-8a63-cf7f-63c6ae6a7bd3", "https://jobs.tugraz.at/en/jobs"], "salaryacc": 2}, "DARMSTADT / Germany": {"city": "DARMSTADT", "earnings": "1030.34", "institution": "TU Darmstadt", "earnoutside": "1058.34", "citations": 135, "salarynet": "2,879.34", "salarytype": "SALARY", "lifecost": "1,031.00", "rentin": "818.00", "rentout": "790.00", "costlife": "1,849.00", "sources": ["https://oeffentlicher-dienst.info/c/t/rechner/tvoed/bund?id=tvoed-bund-2025&g=E_13&s=1&zv=VBL&z=100&zulage=&stj=2025&stkl=1&lst4f=&r=0&zkf=0&pvk=0&kk=17.05%25", "https://www.tu-darmstadt.de/forschen/wissenschaftlicher_nachwuchs_tu/promotionsinteressierte_tu/index.en.jsp", "https://www.career.tu-darmstadt.de/#/tu-darmstadt/jobs"], "salaryacc": 1}, "T\u00fcbingen / Germany": {"city": "T\u00fcbingen", "earnings": "795.94", "institution": "University of T\u00fcbingen", "earnoutside": "1000.94", "citations": "N/A", "salarynet": "2,879.34", "salarytype": "SALARY", "lifecost": "1,038.40", "rentin": "1,045.00", "rentout": "840.00", "costlife": "2,083.40", "sources": ["https://uni-tuebingen.de/en/research/support-for-junior-researchers/funding-and-support-for-junior-researchers/", "https://uni-tuebingen.de/en/forschung/zentren-und-institute/brasilien-und-lateinamerika-zentrum/aktuelles/ausschreibung-opportunities/"], "salaryacc": 2}, "BERLIN / Germany": {"city": "BERLIN", "earnings": "688.85", "institution": "TU Berlin", "earnoutside": "992.45", "citations": 20, "salarynet": "2,879.34", "salarytype": "SALARY", "lifecost": "983.20", "rentin": "1,207.29", "rentout": "903.69", "costlife": "2,190.49", "sources": ["https://researchersjob.com/doctoral-positions-at-tu-berlin/", "https://www.tu.berlin/en/cjs/weitere-seiten/advancement-of-junior-scholars/doctorate/funding"], "salaryacc": 2}, "Aalborg / Denmark": {"city": "Aalborg", "earnings": "560.66", "institution": "Aalborg University", "earnoutside": "773.05", "citations": "N/A", "salarynet": "2,570.15", "salarytype": "SALARY", "lifecost": "1,200.00", "rentin": "809.49", "rentout": "597.10", "costlife": "2,009.49", "sources": ["https://www.aaudxp-cms.aau.dk/media/f3dnu4ub/l%C3%B8noversigter-april-2025_akademisk-d4907560.pdf"], "salaryacc": 1}, "MUNICH / Germany": {"city": "MUNICH", "earnings": "284.65", "institution": "LMU Munich", "earnoutside": "622.98", "citations": 6, "salarynet": "2,879.34", "salarytype": "SALARY", "lifecost": "1,056.90", "rentin": "1,537.79", "rentout": "1,199.46", "costlife": "2,594.69", "sources": ["https://www.plai.ifi.lmu.de/jobs/doctoral/index.html"], "salaryacc": 1}, "WIEN / Austria": {"city": "WIEN", "earnings": "269.02", "institution": "TU Wien", "earnoutside": "596.0", "citations": 58, "salarynet": "2,403.00", "salarytype": "SALARY?", "lifecost": "1,053.50", "rentin": "1,080.48", "rentout": "753.50", "costlife": "2,133.98", "sources": ["https://secpriv.wien/jobs/"], "salaryacc": 2}, "COPENHAGEN / Denmark": {"city": "COPENHAGEN", "earnings": "-101.42", "institution": "University of Copenhagen", "earnoutside": "483.58", "citations": 5, "salarynet": "2,827.76", "salarytype": "SALARY", "lifecost": "1,174.80", "rentin": "1,754.38", "rentout": "1,169.38", "costlife": "2,929.18", "sources": ["https://phd.humanities.ku.dk/phd-programme/employment-as-a-phd-student/", "https://ism.ku.dk/salary-tax-pension/salary/", "https://dm.dk/english/advice-and-answers/university-staff/", "https://dm.dk/english/salary/universities-and-institutions-of-higher-education/"], "salaryacc": 1}, "DELFT / Netherlands": {"city": "DELFT", "earnings": "107.55", "institution": "TU Delft", "earnoutside": "349.55", "citations": 33, "salarynet": "2,422.95", "salarytype": "SALARY", "lifecost": "945.40", "rentin": "1,370.00", "rentout": "1,128.00", "costlife": "2,315.40", "sources": ["https://microelectronics.tudelft.nl/Openings/phdstudents.php", "https://www.universiteitenvannederland.nl/files/publications/CAO%20Nederlandse%20Universiteiten%202024-2025%20Engelse%20vertaling_0.pdf"], "salaryacc": 2}, "SHEFFIELD / United Kingdom": {"city": "SHEFFIELD", "earnings": "140.38", "institution": "University of Sheffield", "earnoutside": "342.18", "citations": 3, "salarynet": "1,993.49", "salarytype": "STIPEND", "lifecost": "886.50", "rentin": "966.61", "rentout": "764.81", "costlife": "1,853.11", "sources": ["https://databasetheory.org/node/135", "https://www.ukri.org/what-we-do/developing-people-and-skills/stfc/training/studentship-information-for-students/payments-to-students/", "https://sheffield.ac.uk/new-students/tuition-fees/fees-lookup"], "salaryacc": 2}, "Coventry / United Kingdom": {"city": "Coventry", "earnings": "-166.81", "institution": "University of Warwick", "earnoutside": "191.46", "citations": 9, "salarynet": "1,993.49", "salarytype": "STIPEND", "lifecost": "890.00", "rentin": "1,270.30", "rentout": "912.03", "costlife": "2,160.30", "sources": ["https://warwick.ac.uk/fac/sci/dcs/research/cscdt/fundingadvice/"], "salaryacc": 1}, "LANCASTER / United Kingdom": {"city": "LANCASTER", "earnings": "-107.35", "institution": "Lancaster University", "earnoutside": "101.65", "citations": "N/A", "salarynet": "1,993.49", "salarytype": "STIPEND", "lifecost": "936.20", "rentin": "1,164.64", "rentout": "955.64", "costlife": "2,100.84", "sources": ["https://www.lancaster.ac.uk/scc/study/phd/phd-opportunities/"], "salaryacc": 1}, "Birmingham / United Kingdom": {"city": "Birmingham", "earnings": "-124.84", "institution": "University of Birmingham", "earnoutside": "92.99", "citations": 38, "salarynet": "1,993.49", "salarytype": "STIPEND (uk only)", "lifecost": "938.20", "rentin": "1,180.13", "rentout": "962.30", "costlife": "2,118.33", "sources": ["https://www.ukri.org/apply-for-funding/studentships-and-doctoral-training/get-a-studentship-to-fund-your-doctorate/https://www.jobs.ac.uk/job/DNQ629/phd-studentship-knowledge-graphs-and-llms-for-decentralised-data-governance", "https://view.officeapps.live.com/op/view.aspx?src=https://www.download.bham.ac.uk/vacancies/HR_Systems/Non_Clinical_Administrative_and_Other_Related_Pay_Spine.xlsx", "https://www.ukri.org/what-we-do/developing-people-and-skills/stfc/training/studentship-information-for-students/payments-to-students/"], "salaryacc": 2}, "CARDIFF / United Kingdom": {"city": "CARDIFF", "earnings": "-82.16", "institution": "Cardiff University", "earnoutside": "73.84", "citations": "N/A", "salarynet": "1,993.49", "salarytype": "STIPEND", "lifecost": "931.50", "rentin": "1,144.15", "rentout": "988.15", "costlife": "2,075.65", "sources": ["https://www.cardiff.ac.uk/computer-science/courses/postgraduate-research", "https://www.ukri.org/what-we-do/developing-people-and-skills/stfc/training/studentship-information-for-students/payments-to-students/"], "salaryacc": 2}, "EDINBURGH / United Kingdom": {"city": "EDINBURGH", "earnings": "-370.23", "institution": "University of Edinburgh", "earnoutside": "-71.73", "citations": 45, "salarynet": "1,993.49", "salarytype": "STIPEND/SCHOLARSHIPS", "lifecost": "1,052.00", "rentin": "1,311.72", "rentout": "1,013.22", "costlife": "2,363.72", "sources": ["https://www.eusa.ed.ac.uk/adviceplace/money/funding/phd", "https://registryservices.ed.ac.uk/student-funding/postgraduate/international/other-funding/doctoral-college", "https://www.ukri.org/apply-for-funding/studentships-and-doctoral-training/get-a-studentship-to-fund-your-doctorate/", "https://www.ukri.org/what-we-do/developing-people-and-skills/stfc/training/studentship-information-for-students/payments-to-students/", "One of the best in AI, despite being terribly funded", "https://www.responsiblenlp.org/2025-studentships/", "https://www.responsiblenlp.org/"], "salaryacc": 2}, "MANCHESTER / United Kingdom": {"city": "MANCHESTER", "earnings": "-392.92", "institution": "University of Manchester", "earnoutside": "-122.64", "citations": 7, "salarynet": "1,993.49", "salarytype": "STIPEND", "lifecost": "1,009.10", "rentin": "1,377.31", "rentout": "1,107.03", "costlife": "2,386.41", "sources": ["https://www.manchester.ac.uk/study/postgraduate-research/funding/", "https://www.manchester.ac.uk/study/postgraduate-research/funding/opportunities/results/?subjectArea=Computer+Science&nationality=United+Kingdom&submit=Search"], "salaryacc": 2}, "AMSTERDAM / Netherlands": {"city": "AMSTERDAM", "earnings": "-695.61", "institution": "University of Amsterdam", "earnoutside": "-271.8", "citations": 1, "salarynet": "2,608.06", "salarytype": "SALARY", "lifecost": "1,153.10", "rentin": "2,150.57", "rentout": "1,726.76", "costlife": "3,303.67", "sources": ["https://phdprogramme.illc.uva.nl/Programme/types-of-contract/#Status,salaryanddurationofappointment", "https://phdprogramme.illc.uva.nl/current-candidates/other/financial/#-", "https://www.nwo.nl/sites/nwo/files/media-files/Salary%20table%20UNL%201%20July%202025.pdf", "https://www.nwo.nl/en/salary-tables", "https://werkenbij.uva.nl/en/about-working-at-the-uva"], "salaryacc": 2}, "Guildford / United Kingdom": {"city": "Guildford", "earnings": "-517.28", "institution": "University of Surrey", "earnoutside": "-342.19", "citations": 17, "salarynet": "2,110.53", "salarytype": "SCHOLARSHIPS", "lifecost": "1,035.60", "rentin": "1,592.21", "rentout": "1,417.12", "costlife": "2,627.81", "sources": ["https://www.surrey.ac.uk/doctoral-college/prospective-postgraduate-researchers/fees-funding", "https://www.surrey.ac.uk/fees-and-funding/studentships"], "salaryacc": 2}, "CAMBRIDGE / United Kingdom": {"city": "CAMBRIDGE", "earnings": "-641.67", "institution": "University of Cambridge", "earnoutside": "-410.27", "citations": 31, "salarynet": "1,993.49", "salarytype": "SCHOLARSHIPS", "lifecost": "1,002.60", "rentin": "1,632.56", "rentout": "1,401.16", "costlife": "2,635.16", "sources": ["https://www.cst.cam.ac.uk/admissions/phd", "https://www.cst.cam.ac.uk/admissions/phd/funding-competitions-and-grants"], "salaryacc": 3}, "OXFORD / United Kingdom": {"city": "OXFORD", "earnings": "-922.68", "institution": "University of Oxford", "earnoutside": "-415.2", "citations": 34, "salarynet": "1,993.49", "salarytype": "STIPEND", "lifecost": "1,058.60", "rentin": "1,857.57", "rentout": "1,350.09", "costlife": "2,916.17", "sources": ["https://www.cs.ox.ac.uk/admissions/graduate/researchstudentships.html", "https://www.ukri.org/what-we-do/developing-people-and-skills/stfc/training/studentship-information-for-students/payments-to-students/"], "salaryacc": 2}, "MILAN / Italy": {"city": "MILAN", "earnings": "-1051.5", "institution": "Politecnico di Milano", "earnoutside": "-637.19", "citations": 3, "salarynet": "1,400.00", "salarytype": "SCHOLARSHIP", "lifecost": "994.60", "rentin": "1,456.90", "rentout": "1,042.59", "costlife": "2,451.50", "sources": ["https://phd-inf.polimi.it/admission/scholarships/"], "salaryacc": 2}, "TRENTO / Italy": {"city": "TRENTO", "earnings": "-860.45", "institution": "University of Trento", "earnoutside": "-677.12", "citations": 4, "salarynet": "897.08", "salarytype": "N/A", "lifecost": "874.20", "rentin": "883.33", "rentout": "700.00", "costlife": "1,757.53", "sources": ["https://iecs.unitn.it/prospective-student/benefits-services"], "salaryacc": "N/A"}, "ROME / Italy": {"city": "ROME", "earnings": "-1245.57", "institution": "Sapienza University of Rome", "earnoutside": "-780.06", "citations": 10, "salarynet": "894.50", "salarytype": "SALARY", "lifecost": "884.90", "rentin": "1,255.17", "rentout": "789.66", "costlife": "2,140.07", "sources": ["https://www.uniroma1.it/en/pagina/phd-programmes-regulations"], "salaryacc": 1}, "LISBON / Portugal": {"city": "LISBON", "earnings": "-1135.44", "institution": "Universidade de Lisboa", "earnoutside": "-786.3", "citations": 27, "salarynet": "1,000.00", "salarytype": "PROJECT", "lifecost": "731.30", "rentin": "1,404.14", "rentout": "1,055.00", "costlife": "2,135.44", "sources": ["https://www.glassdoor.es/Salaries/lisbon-portugal-phd-student-salary-SRCH_IL.0,15_IM1121_KO16,27.htm?countryRedirect=true"], "salaryacc": 3}, "LONDON / United Kingdom": {"city": "LONDON", "earnings": "-1631.33", "institution": "Queen Mary University of London", "earnoutside": "-974.58", "citations": 2, "salarynet": "2,185.36", "salarytype": "SCHOLARSHIP", "lifecost": "1,196.30", "rentin": "2,620.39", "rentout": "1,963.64", "costlife": "3,816.69", "sources": ["https://www.qmul.ac.uk/registry-services/research-degrees/research-student-information/studentships/", "https://www.qmul.ac.uk/registry-services/student-information/my-finances/"], "salaryacc": 1}};
+
+function salaryPublicLabel(val) {
+    if (val === null || val === undefined) return 'N/A';
+    var s = String(val).trim();
+    if (s === '1') return 'YES';
+    if (s === '2') return 'Partially';
+    if (s === '3') return 'NO';
+    return s;
+}
+
+// helper to get current toggle state: false = outside, true = inside
+function isShowingInside() {
+    var t = document.getElementById('earningsToggle');
+    return !!(t && t.checked);
+}
+
+// update popup earnings element by city_key
+function updatePopupEarnings(city_key) {
+    try {
+        var info = cityInfo[city_key];
+        if (!info) return;
+        var showingInside = isShowingInside();
+        var val = showingInside ? info.earnings : info.earnoutside;
+        var display = (val === null || val === undefined) ? 'N/A' : String(val);
+        // map city_key to safe id used in popup spans
+        var safe = String(city_key).replace(/[^A-Za-z0-9_]/g, '_');
+        var el = document.getElementById('popup-earnings-' + safe);
+        if (el) { el.textContent = 'Monthly earnings: ' + display + ' €'; }
+    } catch (e) { console.error(e); }
+}
+
+// when any popup opens, try to find its city_key and update
+function onPopupOpen(e) {
+    try {
+        var popupNode = e.popup ? e.popup.getElement() : null;
+        if (!popupNode) return;
+        var data = popupNode.querySelector('[data-city-key]');
+        if (!data) return;
+        var cityKey = data.getAttribute('data-city-key');
+        if (cityKey) updatePopupEarnings(cityKey);
+    } catch (err) { console.error(err); }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    sidebar = L.control.sidebar({container: "sidebar"}).addTo(map_fbf48a80774e70082c47684d543a652f);
+
+    // toggle setup: get leaflet layer group variables created by folium
+    var outLayer = feature_group_61143ad920f7bc39c168a80b880614b2;
+    var inLayer = feature_group_4b46db54a09935fc183853fd9d336759;
+    var toggle = document.getElementById('earningsToggle');
+    // default: unchecked = show outside, hide inside
+    if (toggle) {
+        toggle.checked = false;
+        // use explicit map variable name generated by folium
+        if (typeof map_fbf48a80774e70082c47684d543a652f !== 'undefined') {
+            // ensure correct initial visibility
+            if (map_fbf48a80774e70082c47684d543a652f.hasLayer(inLayer)) { map_fbf48a80774e70082c47684d543a652f.removeLayer(inLayer); }
+            if (!map_fbf48a80774e70082c47684d543a652f.hasLayer(outLayer)) { map_fbf48a80774e70082c47684d543a652f.addLayer(outLayer); }
+            // listen to popupopen to update contents
+            map_fbf48a80774e70082c47684d543a652f.on('popupopen', onPopupOpen);
+        }
+        toggle.addEventListener('change', function() {
+            if (this.checked) {
+                // switch to inside
+                if (typeof map_fbf48a80774e70082c47684d543a652f !== 'undefined') {
+                    if (map_fbf48a80774e70082c47684d543a652f.hasLayer(outLayer)) { map_fbf48a80774e70082c47684d543a652f.removeLayer(outLayer); }
+                    if (!map_fbf48a80774e70082c47684d543a652f.hasLayer(inLayer)) { map_fbf48a80774e70082c47684d543a652f.addLayer(inLayer); }
+                }
+            } else {
+                // switch to outside
+                if (typeof map_fbf48a80774e70082c47684d543a652f !== 'undefined') {
+                    if (map_fbf48a80774e70082c47684d543a652f.hasLayer(inLayer)) { map_fbf48a80774e70082c47684d543a652f.removeLayer(inLayer); }
+                    if (!map_fbf48a80774e70082c47684d543a652f.hasLayer(outLayer)) { map_fbf48a80774e70082c47684d543a652f.addLayer(outLayer); }
+                }
+            }
+            // update any open popup earnings text when toggling
+            try {
+                var openPopups = document.querySelectorAll('.leaflet-popup');
+                openPopups.forEach(function(p) {
+                    var data = p.querySelector('[data-city-key]');
+                    if (data) updatePopupEarnings(data.getAttribute('data-city-key'));
+                });
+            } catch (err) { console.error(err); }
+        });
+    } else {
+        // if no toggle element found, still attach popupopen handler
+        if (typeof map_fbf48a80774e70082c47684d543a652f !== 'undefined') { map_fbf48a80774e70082c47684d543a652f.on('popupopen', onPopupOpen); }
+    }
+});
+
+function showSidebar(city_key) {
+    var info = cityInfo[city_key];
+    if (info) {
+        var salaryPublic = salaryPublicLabel(info.salaryacc);
+        var inst = info.institution && info.institution !== 'N/A' ? info.institution : info.city;
+        document.getElementById('sidebar-city-title').textContent = inst;
+
+        // build sources HTML: if empty, show N/A; otherwise create an unordered list of links
+        var sourcesHtml = 'N/A';
+        if (Array.isArray(info.sources) && info.sources.length > 0) {
+            var parts = [];
+            for (var i = 0; i < info.sources.length; i++) {
+                var s = String(info.sources[i]).trim();
+                if (s === '') continue;
+                var href = s.match(/^https?:\/\//i) ? s : ('https://' + s);
+                parts.push('<li><a href="' + href + '" target="_blank" rel="noopener noreferrer">' + s + '</a></li>');
+            }
+            if (parts.length > 0) sourcesHtml = '<ul>' + parts.join('') + '</ul>';
+        }
+
+        document.getElementById('sidebar-content').innerHTML =
+            '<h4>INSTITUTION</h4> ' +
+            '<b>Institution location:</b> ' + info.city + '<br>' +
+            '<br><h4>ACADEMIC</h4> ' +
+            '<b>Top-Tier paper publications 2015-2025:</b> ' + info.citations + '<br>' +
+            '<br><h4>PHD SALARY</h4> ' +
+            '<b>Is the salary public?</b> ' + salaryPublic + '<br>' +
+            '<b>Estimated Net salary (monthly), 12 payments, extra payments already considered:</b> ' + info.salarynet + ' €<br>' +
+            '<b>Type of contract:</b> ' + info.salarytype + '<br>' +
+            '<br><h4>COST OF LIFE</h4> ' +
+            '<b>Life cost (rent excluded):</b> ' + info.costlife + ' €<br>' +
+            '<b>Rent 1 person apartment, inside the city center:</b> ' + info.rentin + ' €<br>' +
+            '<b>Rent 1 person apartment, outside the city center:</b> ' + info.rentout + ' €<br>' +
+            '<br><h4>MONTHLY EARNINGS</h4> ' +
+            '<b>Monthly earnings living outside the city center:</b> ' + info.earnoutside + ' €<br>' +
+            '<b>Monthly earnings living in the city center:</b> ' + info.earnings + ' €<br>' +
+            '<br><br><h4>SOURCES</h4> ' +
+            sourcesHtml + '<br>';
+         if(sidebar) sidebar.open('home');
+     }
+}
+
+// helper to apply visibility for no-public class
+function applyNoPublicVisibility(hide) {
+    try {
+        var els = document.querySelectorAll('.no-public');
+        els.forEach(function(e) { e.style.display = hide ? 'none' : ''; });
+    } catch (err) { console.error(err); }
+}
+
+// setup hide/show toggle after DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+    var hideToggle = document.getElementById('hideNoPublicToggle');
+    if (hideToggle) {
+        hideToggle.checked = false; // default: show NO markers
+        hideToggle.addEventListener('change', function() {
+            applyNoPublicVisibility(this.checked);
+        });
+        // apply initially
+        applyNoPublicVisibility(hideToggle.checked);
+        // reapply when layers change (new elements may be added)
+        if (typeof map_fbf48a80774e70082c47684d543a652f !== 'undefined') {
+            map_fbf48a80774e70082c47684d543a652f.on('layeradd', function(){ var ht = document.getElementById('hideNoPublicToggle'); if (ht) { setTimeout(function(){ applyNoPublicVisibility(ht.checked); }, 50); } });
+            map_fbf48a80774e70082c47684d543a652f.on('layerremove', function(){ var ht = document.getElementById('hideNoPublicToggle'); if (ht) { setTimeout(function(){ applyNoPublicVisibility(ht.checked); }, 50); } });
+        }
+    }
+});
+</script>
+    
+<!-- Footer (fixed) -->
+<style id="site-footer-style">
+  #site-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,0.95);
+    border-top: 1px solid rgba(0,0,0,0.08);
+    z-index: 2000;
+    padding: 6px 12px;
+    box-shadow: 0 -1px 4px rgba(0,0,0,0.04);
+    font-family: inherit;
+  }
+  #site-footer .footer-container { position: relative; display: flex; align-items: center; min-height: 28px; }
+  #site-footer .footer-title { font-weight: 700; text-align: center; margin: 0 auto; font-size: 13px; }
+  #site-footer .footer-right { position: absolute; right: 12px; }
+  #site-footer a#about-link { color: #007bff; text-decoration: none; font-size: 13px; }
+  #site-footer a#about-link:hover { text-decoration: underline; }
+</style>
+<footer id="site-footer">
+  <div class="footer-container">
+    <div class="footer-left"></div>
+    <div class="footer-title">EUROPEAN TOP-40 AI RESEARCH ENTITIES</div>
+    <div class="footer-right"><a href="#" id="about-link">About us</a></div>
+  </div>
+</footer>
+
+<!-- About modal (Bootstrap) -->
+<div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="aboutModalLabel">About us</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>This project compares monthly earnings and related metrics across the Top 40 leading European AI research entities. Classification is made based on number of top-tier publications between 2015 and 2025. Data is user-contributed and may contain estimates; please consult sources listed per institution for details.</p>
+        <p>Contact / contributors: <a href="mailto:pias@anonymous.com">pias@anonymous.com</a></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var aboutLink = document.getElementById('about-link');
+    if (aboutLink) {
+      aboutLink.addEventListener('click', function(e){
+        e.preventDefault();
+        try {
+          var modalEl = document.getElementById('aboutModal');
+          var m = new bootstrap.Modal(modalEl);
+          m.show();
+        } catch (err) { console.error(err); alert('Woooo this is bad.'); }
+      });
+    }
+  })();
+</script>
+    
+            <div class="folium-map" id="map_fbf48a80774e70082c47684d543a652f" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_fbf48a80774e70082c47684d543a652f = L.map(
+                "map_fbf48a80774e70082c47684d543a652f",
+                {
+                    center: [50.303114913513504, 5.471611429729729],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 4,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_0c0c555975d80aff331b588ca9528e08 = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 20,
+  "maxNativeZoom": 20,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors \u0026copy; \u003ca href=\"https://carto.com/attributions\"\u003eCARTO\u003c/a\u003e",
+  "subdomains": "abcd",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_0c0c555975d80aff331b588ca9528e08.addTo(map_fbf48a80774e70082c47684d543a652f);
+        
+    
+            var feature_group_61143ad920f7bc39c168a80b880614b2 = L.featureGroup(
+                {
+}
+            );
+        
+    
+            var circle_marker_bdb88bf28b32469864020215812397b9 = L.circleMarker(
+                [47.3744489, 8.5410422],
+                {"bubblingMouseEvents": true, "color": "#4aa01b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4aa01b", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 26.105382796952163, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_e5a7a0eada4ed3d6379cd8aefaee5b4d = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_a090d3551c354eac3c1f3dfc18bb4001 = $(`<div id="html_a090d3551c354eac3c1f3dfc18bb4001" style="width: 100.0%; height: 100.0%;">     <div data-city-key="ZURICH / Switzerland">       <b>ETH Zurich</b><br>       <small>ZURICH</small><br>       <span class="popup-earnings" id="popup-earnings-ZURICH___Switzerland">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('ZURICH / Switzerland');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_e5a7a0eada4ed3d6379cd8aefaee5b4d.setContent(html_a090d3551c354eac3c1f3dfc18bb4001);
+            
+        
+
+        circle_marker_bdb88bf28b32469864020215812397b9.bindPopup(popup_e5a7a0eada4ed3d6379cd8aefaee5b4d)
+        ;
+
+        
+    
+    
+            circle_marker_bdb88bf28b32469864020215812397b9.bindTooltip(
+                `<div>
+                     ZURICH
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_49a128753c5c1fa9121fa72deac0dac5 = L.circleMarker(
+                [49.234362, 6.996379],
+                {"bubblingMouseEvents": true, "color": "#5ca918", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#5ca918", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 24.341666649382717, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_5d578b9dff88f1125463a29b428460e8 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_5bbf90be6c6aeeb5ebbc0351677048ba = $(`<div id="html_5bbf90be6c6aeeb5ebbc0351677048ba" style="width: 100.0%; height: 100.0%;">     <div data-city-key="SAARBRUECKEN / Germany">       <b>CISPA Helmholtz Center</b><br>       <small>SAARBRUECKEN</small><br>       <span class="popup-earnings" id="popup-earnings-SAARBRUECKEN___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('SAARBRUECKEN / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_5d578b9dff88f1125463a29b428460e8.setContent(html_5bbf90be6c6aeeb5ebbc0351677048ba);
+            
+        
+
+        circle_marker_49a128753c5c1fa9121fa72deac0dac5.bindPopup(popup_5d578b9dff88f1125463a29b428460e8)
+        ;
+
+        
+    
+    
+            circle_marker_49a128753c5c1fa9121fa72deac0dac5.bindTooltip(
+                `<div>
+                     SAARBRUECKEN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_bc35e1401a342fce979992d805c2521f = L.circleMarker(
+                [49.234362, 6.996379],
+                {"bubblingMouseEvents": true, "className": "no-public", "color": "#5ca918", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#5ca918", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 24.341666649382717, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_cac9012cd64cb13c1329398abec50158 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_86707b3c4518f4ee4a48f878b1b61b81 = $(`<div id="html_86707b3c4518f4ee4a48f878b1b61b81" style="width: 100.0%; height: 100.0%;">     <div data-city-key="SAARBRUCKEN / Germany">       <b>Saarland University</b><br>       <small>SAARBRUCKEN</small><br>       <span class="popup-earnings" id="popup-earnings-SAARBRUCKEN___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('SAARBRUCKEN / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_cac9012cd64cb13c1329398abec50158.setContent(html_86707b3c4518f4ee4a48f878b1b61b81);
+            
+        
+
+        circle_marker_bc35e1401a342fce979992d805c2521f.bindPopup(popup_cac9012cd64cb13c1329398abec50158)
+        ;
+
+        
+    
+    
+            circle_marker_bc35e1401a342fce979992d805c2521f.bindTooltip(
+                `<div>
+                     SAARBRUCKEN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_291c6a342b463c5b8c5ed3d3d418b001 = L.circleMarker(
+                [51.4818111, 7.2196635],
+                {"bubblingMouseEvents": true, "color": "#6cb216", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#6cb216", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 22.78964117195216, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_b0462992a51f6cda2d67fa953060c3fe = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_51d6a498551dc07e3ff823f56286462a = $(`<div id="html_51d6a498551dc07e3ff823f56286462a" style="width: 100.0%; height: 100.0%;">     <div data-city-key="BOCHUM / Germany">       <b>Max Planck Society</b><br>       <small>BOCHUM</small><br>       <span class="popup-earnings" id="popup-earnings-BOCHUM___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('BOCHUM / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_b0462992a51f6cda2d67fa953060c3fe.setContent(html_51d6a498551dc07e3ff823f56286462a);
+            
+        
+
+        circle_marker_291c6a342b463c5b8c5ed3d3d418b001.bindPopup(popup_b0462992a51f6cda2d67fa953060c3fe)
+        ;
+
+        
+    
+    
+            circle_marker_291c6a342b463c5b8c5ed3d3d418b001.bindTooltip(
+                `<div>
+                     BOCHUM
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_e14330feb622b8463dc58b0254727daa = L.circleMarker(
+                [50.776351, 6.083862],
+                {"bubblingMouseEvents": true, "color": "#84be12", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#84be12", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20.506316849999997, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_9b248389678828a2713357b26f76d48c = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_31b17aacf9d96c70fc03c875834095c9 = $(`<div id="html_31b17aacf9d96c70fc03c875834095c9" style="width: 100.0%; height: 100.0%;">     <div data-city-key="AACHEN / Germany">       <b>RWTH Aachen University</b><br>       <small>AACHEN</small><br>       <span class="popup-earnings" id="popup-earnings-AACHEN___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('AACHEN / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_9b248389678828a2713357b26f76d48c.setContent(html_31b17aacf9d96c70fc03c875834095c9);
+            
+        
+
+        circle_marker_e14330feb622b8463dc58b0254727daa.bindPopup(popup_9b248389678828a2713357b26f76d48c)
+        ;
+
+        
+    
+    
+            circle_marker_e14330feb622b8463dc58b0254727daa.bindTooltip(
+                `<div>
+                     AACHEN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_2043d058662a658d9481c56be0c67e2f = L.circleMarker(
+                [48.30499, 16.323756],
+                {"bubblingMouseEvents": true, "color": "#8cc311", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#8cc311", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 19.72252298271605, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_53e4fe1f3570a37b8f4d7e466aa63932 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e3f2805ec6e702d93bbe4fca321524f3 = $(`<div id="html_e3f2805ec6e702d93bbe4fca321524f3" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Klosterneuburg / Austria">       <b>IST Austria</b><br>       <small>Klosterneuburg</small><br>       <span class="popup-earnings" id="popup-earnings-Klosterneuburg___Austria">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Klosterneuburg / Austria');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_53e4fe1f3570a37b8f4d7e466aa63932.setContent(html_e3f2805ec6e702d93bbe4fca321524f3);
+            
+        
+
+        circle_marker_2043d058662a658d9481c56be0c67e2f.bindPopup(popup_53e4fe1f3570a37b8f4d7e466aa63932)
+        ;
+
+        
+    
+    
+            circle_marker_2043d058662a658d9481c56be0c67e2f.bindTooltip(
+                `<div>
+                     Klosterneuburg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_b7d220ef2cc91ff46c25515ee8dbbe90 = L.circleMarker(
+                [49.7780356, 9.9434769],
+                {"bubblingMouseEvents": true, "color": "#8dc311", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#8dc311", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 19.629406072993827, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_3d1a8d9e119610e7eba4a2db3b6c8a36 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_5311c7ed0012e7edcce25bc3512a70c8 = $(`<div id="html_5311c7ed0012e7edcce25bc3512a70c8" style="width: 100.0%; height: 100.0%;">     <div data-city-key="WURZBURG / Germany">       <b>University of Würzburg</b><br>       <small>WURZBURG</small><br>       <span class="popup-earnings" id="popup-earnings-WURZBURG___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('WURZBURG / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_3d1a8d9e119610e7eba4a2db3b6c8a36.setContent(html_5311c7ed0012e7edcce25bc3512a70c8);
+            
+        
+
+        circle_marker_b7d220ef2cc91ff46c25515ee8dbbe90.bindPopup(popup_3d1a8d9e119610e7eba4a2db3b6c8a36)
+        ;
+
+        
+    
+    
+            circle_marker_b7d220ef2cc91ff46c25515ee8dbbe90.bindTooltip(
+                `<div>
+                     WURZBURG
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_65d80d0e24bbf0cf67ca278350202046 = L.circleMarker(
+                [46.5218269, 6.6327025],
+                {"bubblingMouseEvents": true, "color": "#9bca0f", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#9bca0f", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 18.297036361882714, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_add81193363fd8d3a7ee0525acf066b9 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_2e92cc4c715ba225403a87dc69a86672 = $(`<div id="html_2e92cc4c715ba225403a87dc69a86672" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Lausanne / Switzerland">       <b>EPFL</b><br>       <small>Lausanne</small><br>       <span class="popup-earnings" id="popup-earnings-Lausanne___Switzerland">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Lausanne / Switzerland');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_add81193363fd8d3a7ee0525acf066b9.setContent(html_2e92cc4c715ba225403a87dc69a86672);
+            
+        
+
+        circle_marker_65d80d0e24bbf0cf67ca278350202046.bindPopup(popup_add81193363fd8d3a7ee0525acf066b9)
+        ;
+
+        
+    
+    
+            circle_marker_65d80d0e24bbf0cf67ca278350202046.bindTooltip(
+                `<div>
+                     Lausanne
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_73f6876dedffbb7bbdd7435c4dde1ae8 = L.circleMarker(
+                [53.866444, 10.684738],
+                {"bubblingMouseEvents": true, "className": "no-public", "color": "#9dcb0e", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#9dcb0e", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 18.105561961882714, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_cab19f3a46df2d06962ef345f8cf5d74 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_52ccff6577bf74d6ab4a436ba99947be = $(`<div id="html_52ccff6577bf74d6ab4a436ba99947be" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Lübeck / Germany">       <b>University of Lübeck</b><br>       <small>Lübeck</small><br>       <span class="popup-earnings" id="popup-earnings-L_beck___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Lübeck / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_cab19f3a46df2d06962ef345f8cf5d74.setContent(html_52ccff6577bf74d6ab4a436ba99947be);
+            
+        
+
+        circle_marker_73f6876dedffbb7bbdd7435c4dde1ae8.bindPopup(popup_cab19f3a46df2d06962ef345f8cf5d74)
+        ;
+
+        
+    
+    
+            circle_marker_73f6876dedffbb7bbdd7435c4dde1ae8.bindTooltip(
+                `<div>
+                     Lübeck
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f75468255add2660333c173d36b9e960 = L.circleMarker(
+                [47.0708678, 15.4382786],
+                {"bubblingMouseEvents": true, "color": "#b1d60b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#b1d60b", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 16.199317017438275, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_275d721442544f1d96b97f4a2981dd43 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_d8b717021418269eddeef629c3462a3a = $(`<div id="html_d8b717021418269eddeef629c3462a3a" style="width: 100.0%; height: 100.0%;">     <div data-city-key="GRAZ / Austria">       <b>Graz University of Technology</b><br>       <small>GRAZ</small><br>       <span class="popup-earnings" id="popup-earnings-GRAZ___Austria">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('GRAZ / Austria');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_275d721442544f1d96b97f4a2981dd43.setContent(html_d8b717021418269eddeef629c3462a3a);
+            
+        
+
+        circle_marker_f75468255add2660333c173d36b9e960.bindPopup(popup_275d721442544f1d96b97f4a2981dd43)
+        ;
+
+        
+    
+    
+            circle_marker_f75468255add2660333c173d36b9e960.bindTooltip(
+                `<div>
+                     GRAZ
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a1cdc495958fcf063352f7b345fbf920 = L.circleMarker(
+                [49.872775, 8.651177],
+                {"bubblingMouseEvents": true, "color": "#b2d60b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#b2d60b", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 16.09622702361111, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_0f99d14f5958ff57c7ab8ff813f4bf22 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_1496559da2bd9b03ad2afba4b6ab9bb4 = $(`<div id="html_1496559da2bd9b03ad2afba4b6ab9bb4" style="width: 100.0%; height: 100.0%;">     <div data-city-key="DARMSTADT / Germany">       <b>TU Darmstadt</b><br>       <small>DARMSTADT</small><br>       <span class="popup-earnings" id="popup-earnings-DARMSTADT___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('DARMSTADT / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_0f99d14f5958ff57c7ab8ff813f4bf22.setContent(html_1496559da2bd9b03ad2afba4b6ab9bb4);
+            
+        
+
+        circle_marker_a1cdc495958fcf063352f7b345fbf920.bindPopup(popup_0f99d14f5958ff57c7ab8ff813f4bf22)
+        ;
+
+        
+    
+    
+            circle_marker_a1cdc495958fcf063352f7b345fbf920.bindTooltip(
+                `<div>
+                     DARMSTADT
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a744e47ba53b511719bd3e06c19e1531 = L.circleMarker(
+                [48.5203263, 9.053596],
+                {"bubblingMouseEvents": true, "color": "#badb0a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#badb0a", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 15.32097801743827, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_1a6b954ce676ffe327fcfebe27ac8a5d = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_24db9458126d6a44b730f117f8c08b0b = $(`<div id="html_24db9458126d6a44b730f117f8c08b0b" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Tübingen / Germany">       <b>University of Tübingen</b><br>       <small>Tübingen</small><br>       <span class="popup-earnings" id="popup-earnings-T_bingen___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Tübingen / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_1a6b954ce676ffe327fcfebe27ac8a5d.setContent(html_24db9458126d6a44b730f117f8c08b0b);
+            
+        
+
+        circle_marker_a744e47ba53b511719bd3e06c19e1531.bindPopup(popup_1a6b954ce676ffe327fcfebe27ac8a5d)
+        ;
+
+        
+    
+    
+            circle_marker_a744e47ba53b511719bd3e06c19e1531.bindTooltip(
+                `<div>
+                     Tübingen
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_2f23c812d80970812dd36a29a3d91d21 = L.circleMarker(
+                [52.5173885, 13.3951309],
+                {"bubblingMouseEvents": true, "color": "#bbdb0a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#bbdb0a", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 15.20998034047068, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_8d9466e078010f1b41e964c2408e39c6 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_686396c62c230373ca92f9ef448e3cef = $(`<div id="html_686396c62c230373ca92f9ef448e3cef" style="width: 100.0%; height: 100.0%;">     <div data-city-key="BERLIN / Germany">       <b>TU Berlin</b><br>       <small>BERLIN</small><br>       <span class="popup-earnings" id="popup-earnings-BERLIN___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('BERLIN / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_8d9466e078010f1b41e964c2408e39c6.setContent(html_686396c62c230373ca92f9ef448e3cef);
+            
+        
+
+        circle_marker_2f23c812d80970812dd36a29a3d91d21.bindPopup(popup_8d9466e078010f1b41e964c2408e39c6)
+        ;
+
+        
+    
+    
+            circle_marker_2f23c812d80970812dd36a29a3d91d21.bindTooltip(
+                `<div>
+                     BERLIN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_2c7c0d129b2bf06eddc5e6d664238d63 = L.circleMarker(
+                [57.0462626, 9.9215263],
+                {"bubblingMouseEvents": true, "color": "#d6e906", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#d6e906", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 12.669485780285493, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_d5d60730d7b4e2f2a24a23dc7571368b = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_ddfd0fafcc31d08b245fb61fa3549a68 = $(`<div id="html_ddfd0fafcc31d08b245fb61fa3549a68" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Aalborg / Denmark">       <b>Aalborg University</b><br>       <small>Aalborg</small><br>       <span class="popup-earnings" id="popup-earnings-Aalborg___Denmark">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Aalborg / Denmark');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_d5d60730d7b4e2f2a24a23dc7571368b.setContent(html_ddfd0fafcc31d08b245fb61fa3549a68);
+            
+        
+
+        circle_marker_2c7c0d129b2bf06eddc5e6d664238d63.bindPopup(popup_d5d60730d7b4e2f2a24a23dc7571368b)
+        ;
+
+        
+    
+    
+            circle_marker_2c7c0d129b2bf06eddc5e6d664238d63.bindTooltip(
+                `<div>
+                     Aalborg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_cdafe1767d13c62d5dc54c2fa6d3d7b0 = L.circleMarker(
+                [48.1371079, 11.5753822],
+                {"bubblingMouseEvents": true, "color": "#e4f104", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e4f104", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.2954357125, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_a1b2bdd555cc4052a28dae690d677e53 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_267ec09eec61042fe3e7baf13bebdd21 = $(`<div id="html_267ec09eec61042fe3e7baf13bebdd21" style="width: 100.0%; height: 100.0%;">     <div data-city-key="MUNICH / Germany">       <b>TU Munich</b><br>       <small>MUNICH</small><br>       <span class="popup-earnings" id="popup-earnings-MUNICH___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('MUNICH / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_a1b2bdd555cc4052a28dae690d677e53.setContent(html_267ec09eec61042fe3e7baf13bebdd21);
+            
+        
+
+        circle_marker_cdafe1767d13c62d5dc54c2fa6d3d7b0.bindPopup(popup_a1b2bdd555cc4052a28dae690d677e53)
+        ;
+
+        
+    
+    
+            circle_marker_cdafe1767d13c62d5dc54c2fa6d3d7b0.bindTooltip(
+                `<div>
+                     MUNICH
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_124eae0f34df1cfb043457797242c4cb = L.circleMarker(
+                [48.1371079, 11.5753822],
+                {"bubblingMouseEvents": true, "color": "#e4f104", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e4f104", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.2954357125, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_6bf450e548fe121081733853a07ab15f = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_0886d2b50f49a84a4b0220df41634fbe = $(`<div id="html_0886d2b50f49a84a4b0220df41634fbe" style="width: 100.0%; height: 100.0%;">     <div data-city-key="MUNICH / Germany">       <b>LMU Munich</b><br>       <small>MUNICH</small><br>       <span class="popup-earnings" id="popup-earnings-MUNICH___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('MUNICH / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_6bf450e548fe121081733853a07ab15f.setContent(html_0886d2b50f49a84a4b0220df41634fbe);
+            
+        
+
+        circle_marker_124eae0f34df1cfb043457797242c4cb.bindPopup(popup_6bf450e548fe121081733853a07ab15f)
+        ;
+
+        
+    
+    
+            circle_marker_124eae0f34df1cfb043457797242c4cb.bindTooltip(
+                `<div>
+                     MUNICH
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_11c669adb7d5f4109474d94e6f110af1 = L.circleMarker(
+                [48.2083537, 16.3725042],
+                {"bubblingMouseEvents": true, "color": "#e6f203", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e6f203", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.079734567901234, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_0083d5f347e1ccbf4af4143611cb2107 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_5f3ad9ff25bc3c31a7087d9fb610b56b = $(`<div id="html_5f3ad9ff25bc3c31a7087d9fb610b56b" style="width: 100.0%; height: 100.0%;">     <div data-city-key="WIEN / Austria">       <b>TU Wien</b><br>       <small>WIEN</small><br>       <span class="popup-earnings" id="popup-earnings-WIEN___Austria">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('WIEN / Austria');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_0083d5f347e1ccbf4af4143611cb2107.setContent(html_5f3ad9ff25bc3c31a7087d9fb610b56b);
+            
+        
+
+        circle_marker_11c669adb7d5f4109474d94e6f110af1.bindPopup(popup_0083d5f347e1ccbf4af4143611cb2107)
+        ;
+
+        
+    
+    
+            circle_marker_11c669adb7d5f4109474d94e6f110af1.bindTooltip(
+                `<div>
+                     WIEN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_3296e01748d8ae85ee7ed5e19fca9141 = L.circleMarker(
+                [55.6867243, 12.5700724],
+                {"bubblingMouseEvents": true, "color": "#eff602", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#eff602", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.283735910030863, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_a13472c58144e118bf36dbd088d87d16 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e328291e1ec16070619ed6513bf6fcc1 = $(`<div id="html_e328291e1ec16070619ed6513bf6fcc1" style="width: 100.0%; height: 100.0%;">     <div data-city-key="COPENHAGEN / Denmark">       <b>University of Copenhagen</b><br>       <small>COPENHAGEN</small><br>       <span class="popup-earnings" id="popup-earnings-COPENHAGEN___Denmark">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('COPENHAGEN / Denmark');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_a13472c58144e118bf36dbd088d87d16.setContent(html_e328291e1ec16070619ed6513bf6fcc1);
+            
+        
+
+        circle_marker_3296e01748d8ae85ee7ed5e19fca9141.bindPopup(popup_a13472c58144e118bf36dbd088d87d16)
+        ;
+
+        
+    
+    
+            circle_marker_3296e01748d8ae85ee7ed5e19fca9141.bindTooltip(
+                `<div>
+                     COPENHAGEN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_d6dab5cf4d38d10156b0995df8f6b0e7 = L.circleMarker(
+                [52.0114017, 4.35839],
+                {"bubblingMouseEvents": true, "color": "#f6fa01", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f6fa01", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 9.551368997878086, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_38331a979a9fbf30017939bf320c1a9a = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_3de843d9ed6eac6f39cb1155cd85bdef = $(`<div id="html_3de843d9ed6eac6f39cb1155cd85bdef" style="width: 100.0%; height: 100.0%;">     <div data-city-key="DELFT / Netherlands">       <b>TU Delft</b><br>       <small>DELFT</small><br>       <span class="popup-earnings" id="popup-earnings-DELFT___Netherlands">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('DELFT / Netherlands');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_38331a979a9fbf30017939bf320c1a9a.setContent(html_3de843d9ed6eac6f39cb1155cd85bdef);
+            
+        
+
+        circle_marker_d6dab5cf4d38d10156b0995df8f6b0e7.bindPopup(popup_38331a979a9fbf30017939bf320c1a9a)
+        ;
+
+        
+    
+    
+            circle_marker_d6dab5cf4d38d10156b0995df8f6b0e7.bindTooltip(
+                `<div>
+                     DELFT
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_1bfbf14edddb8e0e8fc3e16cf3eebf1c = L.circleMarker(
+                [53.3806626, -1.4702278],
+                {"bubblingMouseEvents": true, "color": "#f7fa01", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f7fa01", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 9.5179327125, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_3ae90ec66fdd1210ac6b3c2368062373 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_a7d6ce55eefa8d235fc80172fd41f87a = $(`<div id="html_a7d6ce55eefa8d235fc80172fd41f87a" style="width: 100.0%; height: 100.0%;">     <div data-city-key="SHEFFIELD / United Kingdom">       <b>University of Sheffield</b><br>       <small>SHEFFIELD</small><br>       <span class="popup-earnings" id="popup-earnings-SHEFFIELD___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('SHEFFIELD / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_3ae90ec66fdd1210ac6b3c2368062373.setContent(html_a7d6ce55eefa8d235fc80172fd41f87a);
+            
+        
+
+        circle_marker_1bfbf14edddb8e0e8fc3e16cf3eebf1c.bindPopup(popup_3ae90ec66fdd1210ac6b3c2368062373)
+        ;
+
+        
+    
+    
+            circle_marker_1bfbf14edddb8e0e8fc3e16cf3eebf1c.bindTooltip(
+                `<div>
+                     SHEFFIELD
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_fc537ac537de99357b73c965bf0355fd = L.circleMarker(
+                [52.4081812, -1.510477],
+                {"bubblingMouseEvents": true, "color": "#fcfd00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fcfd00", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.990419690277777, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_3d1517c76eda378cc11087155c439b72 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_4f38d50dd98b84c0cacc22f9192f206a = $(`<div id="html_4f38d50dd98b84c0cacc22f9192f206a" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Coventry / United Kingdom">       <b>University of Warwick</b><br>       <small>Coventry</small><br>       <span class="popup-earnings" id="popup-earnings-Coventry___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Coventry / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_3d1517c76eda378cc11087155c439b72.setContent(html_4f38d50dd98b84c0cacc22f9192f206a);
+            
+        
+
+        circle_marker_fc537ac537de99357b73c965bf0355fd.bindPopup(popup_3d1517c76eda378cc11087155c439b72)
+        ;
+
+        
+    
+    
+            circle_marker_fc537ac537de99357b73c965bf0355fd.bindTooltip(
+                `<div>
+                     Coventry
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_d53a613652f01ed01bfb9cf0cf7e2f1a = L.circleMarker(
+                [54.0488219, -2.8013499],
+                {"bubblingMouseEvents": true, "color": "#fefe00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fefe00", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.817768627507716, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_587427a12518ec98114938f2f86ebd14 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_80d001b519ec042b7b26599f2b2723e0 = $(`<div id="html_80d001b519ec042b7b26599f2b2723e0" style="width: 100.0%; height: 100.0%;">     <div data-city-key="LANCASTER / United Kingdom">       <b>Lancaster University</b><br>       <small>LANCASTER</small><br>       <span class="popup-earnings" id="popup-earnings-LANCASTER___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('LANCASTER / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_587427a12518ec98114938f2f86ebd14.setContent(html_80d001b519ec042b7b26599f2b2723e0);
+            
+        
+
+        circle_marker_d53a613652f01ed01bfb9cf0cf7e2f1a.bindPopup(popup_587427a12518ec98114938f2f86ebd14)
+        ;
+
+        
+    
+    
+            circle_marker_d53a613652f01ed01bfb9cf0cf7e2f1a.bindTooltip(
+                `<div>
+                     LANCASTER
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_bfc180e546cc002fd7356ddf8383e810 = L.circleMarker(
+                [52.4796992, -1.9026911],
+                {"bubblingMouseEvents": true, "color": "#fefe00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fefe00", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.806713496026234, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_66fe26b2aa426d623019ed8d65addbdf = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_f3a9d329769f3178829706adea6681fa = $(`<div id="html_f3a9d329769f3178829706adea6681fa" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Birmingham / United Kingdom">       <b>University of Birmingham</b><br>       <small>Birmingham</small><br>       <span class="popup-earnings" id="popup-earnings-Birmingham___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Birmingham / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_66fe26b2aa426d623019ed8d65addbdf.setContent(html_f3a9d329769f3178829706adea6681fa);
+            
+        
+
+        circle_marker_bfc180e546cc002fd7356ddf8383e810.bindPopup(popup_66fe26b2aa426d623019ed8d65addbdf)
+        ;
+
+        
+    
+    
+            circle_marker_bfc180e546cc002fd7356ddf8383e810.bindTooltip(
+                `<div>
+                     Birmingham
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_c416b244b11541f6e8c9f5d88f188066 = L.circleMarker(
+                [51.4816546, -3.1791934],
+                {"bubblingMouseEvents": true, "color": "#fefe00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fefe00", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.78575998271605, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_3d0df5ad0e5d9e6dd2d274bf746d7bca = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_d9ed3064294567913d3eaf7dafaff8db = $(`<div id="html_d9ed3064294567913d3eaf7dafaff8db" style="width: 100.0%; height: 100.0%;">     <div data-city-key="CARDIFF / United Kingdom">       <b>Cardiff University</b><br>       <small>CARDIFF</small><br>       <span class="popup-earnings" id="popup-earnings-CARDIFF___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('CARDIFF / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_3d0df5ad0e5d9e6dd2d274bf746d7bca.setContent(html_d9ed3064294567913d3eaf7dafaff8db);
+            
+        
+
+        circle_marker_c416b244b11541f6e8c9f5d88f188066.bindPopup(popup_3d0df5ad0e5d9e6dd2d274bf746d7bca)
+        ;
+
+        
+    
+    
+            circle_marker_c416b244b11541f6e8c9f5d88f188066.bindTooltip(
+                `<div>
+                     CARDIFF
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_bfbb9166ac0b63980e8c746485c56f66 = L.circleMarker(
+                [55.9533456, -3.1883749],
+                {"bubblingMouseEvents": true, "color": "#f99b02", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f99b02", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.61550625, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_096c38a3d270ea900919e8ea965c5ac0 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_bf4598df3c5756e04b7e0638dd2a55f4 = $(`<div id="html_bf4598df3c5756e04b7e0638dd2a55f4" style="width: 100.0%; height: 100.0%;">     <div data-city-key="EDINBURGH / United Kingdom">       <b>University of Edinburgh</b><br>       <small>EDINBURGH</small><br>       <span class="popup-earnings" id="popup-earnings-EDINBURGH___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('EDINBURGH / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_096c38a3d270ea900919e8ea965c5ac0.setContent(html_bf4598df3c5756e04b7e0638dd2a55f4);
+            
+        
+
+        circle_marker_bfbb9166ac0b63980e8c746485c56f66.bindPopup(popup_096c38a3d270ea900919e8ea965c5ac0)
+        ;
+
+        
+    
+    
+            circle_marker_bfbb9166ac0b63980e8c746485c56f66.bindTooltip(
+                `<div>
+                     EDINBURGH
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_6d0e131b546d1e4a82be0b95142c8fa2 = L.circleMarker(
+                [53.4794892, -2.2451148],
+                {"bubblingMouseEvents": true, "color": "#f59404", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f59404", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.52005, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_089b020f325f893106d8b33ea8d96cb0 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_024e115a2e85d89828ac9b7edb015b8b = $(`<div id="html_024e115a2e85d89828ac9b7edb015b8b" style="width: 100.0%; height: 100.0%;">     <div data-city-key="MANCHESTER / United Kingdom">       <b>University of Manchester</b><br>       <small>MANCHESTER</small><br>       <span class="popup-earnings" id="popup-earnings-MANCHESTER___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('MANCHESTER / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_089b020f325f893106d8b33ea8d96cb0.setContent(html_024e115a2e85d89828ac9b7edb015b8b);
+            
+        
+
+        circle_marker_6d0e131b546d1e4a82be0b95142c8fa2.bindPopup(popup_089b020f325f893106d8b33ea8d96cb0)
+        ;
+
+        
+    
+    
+            circle_marker_6d0e131b546d1e4a82be0b95142c8fa2.bindTooltip(
+                `<div>
+                     MANCHESTER
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_9694c055dbb7b22caa8b398a79913056 = L.circleMarker(
+                [52.3730796, 4.8924534],
+                {"bubblingMouseEvents": true, "color": "#ea8109", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea8109", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.240375, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_9a678fc7643d9baa8423e525f9c91c51 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_8d73eba4722ee6acb9a22640569e7810 = $(`<div id="html_8d73eba4722ee6acb9a22640569e7810" style="width: 100.0%; height: 100.0%;">     <div data-city-key="AMSTERDAM / Netherlands">       <b>University of Amsterdam</b><br>       <small>AMSTERDAM</small><br>       <span class="popup-earnings" id="popup-earnings-AMSTERDAM___Netherlands">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('AMSTERDAM / Netherlands');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_9a678fc7643d9baa8423e525f9c91c51.setContent(html_8d73eba4722ee6acb9a22640569e7810);
+            
+        
+
+        circle_marker_9694c055dbb7b22caa8b398a79913056.bindPopup(popup_9a678fc7643d9baa8423e525f9c91c51)
+        ;
+
+        
+    
+    
+            circle_marker_9694c055dbb7b22caa8b398a79913056.bindTooltip(
+                `<div>
+                     AMSTERDAM
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_61ade175c0d3bd8da130f9f6592a8113 = L.circleMarker(
+                [51.2356068, -0.5732063],
+                {"bubblingMouseEvents": true, "color": "#e4780b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e4780b", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.10839375, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_e00061792aa26f0b42f55cb84d3141a2 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_a4ef38d1629fd0fa8cfddb04d5ec6d91 = $(`<div id="html_a4ef38d1629fd0fa8cfddb04d5ec6d91" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Guildford / United Kingdom">       <b>University of Surrey</b><br>       <small>Guildford</small><br>       <span class="popup-earnings" id="popup-earnings-Guildford___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Guildford / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_e00061792aa26f0b42f55cb84d3141a2.setContent(html_a4ef38d1629fd0fa8cfddb04d5ec6d91);
+            
+        
+
+        circle_marker_61ade175c0d3bd8da130f9f6592a8113.bindPopup(popup_e00061792aa26f0b42f55cb84d3141a2)
+        ;
+
+        
+    
+    
+            circle_marker_61ade175c0d3bd8da130f9f6592a8113.bindTooltip(
+                `<div>
+                     Guildford
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_466bf3732f4172ebf25132a8740da024 = L.circleMarker(
+                [52.2055314, 0.1186637],
+                {"bubblingMouseEvents": true, "className": "no-public", "color": "#df6f0d", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#df6f0d", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.98074375, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_957bf71561ccfc8ca8ac1f332dfc94a1 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_f69e9fc16b69f1199a00a83f5d15b08b = $(`<div id="html_f69e9fc16b69f1199a00a83f5d15b08b" style="width: 100.0%; height: 100.0%;">     <div data-city-key="CAMBRIDGE / United Kingdom">       <b>University of Cambridge</b><br>       <small>CAMBRIDGE</small><br>       <span class="popup-earnings" id="popup-earnings-CAMBRIDGE___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('CAMBRIDGE / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_957bf71561ccfc8ca8ac1f332dfc94a1.setContent(html_f69e9fc16b69f1199a00a83f5d15b08b);
+            
+        
+
+        circle_marker_466bf3732f4172ebf25132a8740da024.bindPopup(popup_957bf71561ccfc8ca8ac1f332dfc94a1)
+        ;
+
+        
+    
+    
+            circle_marker_466bf3732f4172ebf25132a8740da024.bindTooltip(
+                `<div>
+                     CAMBRIDGE
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_60dc23bb507afde21a418be185fc4fc8 = L.circleMarker(
+                [51.7520131, -1.2578499],
+                {"bubblingMouseEvents": true, "color": "#df6e0e", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#df6e0e", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.9715, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_99ece26e7c2218fc3cb6a64fe15c90b8 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e71bfa237dd6b0f40e689913557629d7 = $(`<div id="html_e71bfa237dd6b0f40e689913557629d7" style="width: 100.0%; height: 100.0%;">     <div data-city-key="OXFORD / United Kingdom">       <b>University of Oxford</b><br>       <small>OXFORD</small><br>       <span class="popup-earnings" id="popup-earnings-OXFORD___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('OXFORD / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_99ece26e7c2218fc3cb6a64fe15c90b8.setContent(html_e71bfa237dd6b0f40e689913557629d7);
+            
+        
+
+        circle_marker_60dc23bb507afde21a418be185fc4fc8.bindPopup(popup_99ece26e7c2218fc3cb6a64fe15c90b8)
+        ;
+
+        
+    
+    
+            circle_marker_60dc23bb507afde21a418be185fc4fc8.bindTooltip(
+                `<div>
+                     OXFORD
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_568a59d221f1e63cef3687058ae5b5b4 = L.circleMarker(
+                [45.4641943, 9.1896346],
+                {"bubblingMouseEvents": true, "color": "#cd5115", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#cd5115", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.55526875, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_72bb5a321309d944f2b330899dd7ab6e = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_08593fd608851398b4dc95f8c59f0943 = $(`<div id="html_08593fd608851398b4dc95f8c59f0943" style="width: 100.0%; height: 100.0%;">     <div data-city-key="MILAN / Italy">       <b>Politecnico di Milano</b><br>       <small>MILAN</small><br>       <span class="popup-earnings" id="popup-earnings-MILAN___Italy">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('MILAN / Italy');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_72bb5a321309d944f2b330899dd7ab6e.setContent(html_08593fd608851398b4dc95f8c59f0943);
+            
+        
+
+        circle_marker_568a59d221f1e63cef3687058ae5b5b4.bindPopup(popup_72bb5a321309d944f2b330899dd7ab6e)
+        ;
+
+        
+    
+    
+            circle_marker_568a59d221f1e63cef3687058ae5b5b4.bindTooltip(
+                `<div>
+                     MILAN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_c7f94c3bd6a24aaac03cf864f2eefc0e = L.circleMarker(
+                [46.1029536, 11.1297425],
+                {"bubblingMouseEvents": true, "color": "#ca4c17", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ca4c17", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.4803999999999995, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_52fb6f0d7f3cfe8cbd9d442f0fbf74b0 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_2662baa0f233d307d73e43f0d7dbe9fd = $(`<div id="html_2662baa0f233d307d73e43f0d7dbe9fd" style="width: 100.0%; height: 100.0%;">     <div data-city-key="TRENTO / Italy">       <b>University of Trento</b><br>       <small>TRENTO</small><br>       <span class="popup-earnings" id="popup-earnings-TRENTO___Italy">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('TRENTO / Italy');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_52fb6f0d7f3cfe8cbd9d442f0fbf74b0.setContent(html_2662baa0f233d307d73e43f0d7dbe9fd);
+            
+        
+
+        circle_marker_c7f94c3bd6a24aaac03cf864f2eefc0e.bindPopup(popup_52fb6f0d7f3cfe8cbd9d442f0fbf74b0)
+        ;
+
+        
+    
+    
+            circle_marker_c7f94c3bd6a24aaac03cf864f2eefc0e.bindTooltip(
+                `<div>
+                     TRENTO
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_583c5c5f4bdc7b1472e533fc58018900 = L.circleMarker(
+                [41.8933203, 12.4829321],
+                {"bubblingMouseEvents": true, "color": "#c23e1a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#c23e1a", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.2873874999999995, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_10d7d8cc432688c86a4d49b980333525 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_0d4503f63e99e55d6382e5442f0744ec = $(`<div id="html_0d4503f63e99e55d6382e5442f0744ec" style="width: 100.0%; height: 100.0%;">     <div data-city-key="ROME / Italy">       <b>Sapienza University of Rome</b><br>       <small>ROME</small><br>       <span class="popup-earnings" id="popup-earnings-ROME___Italy">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('ROME / Italy');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_10d7d8cc432688c86a4d49b980333525.setContent(html_0d4503f63e99e55d6382e5442f0744ec);
+            
+        
+
+        circle_marker_583c5c5f4bdc7b1472e533fc58018900.bindPopup(popup_10d7d8cc432688c86a4d49b980333525)
+        ;
+
+        
+    
+    
+            circle_marker_583c5c5f4bdc7b1472e533fc58018900.bindTooltip(
+                `<div>
+                     ROME
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_5de25be8d4c47ccefdd5669422d97b11 = L.circleMarker(
+                [38.7077507, -9.1365919],
+                {"bubblingMouseEvents": true, "className": "no-public", "color": "#c23d1a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#c23d1a", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.2756875, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_b1524a80d2a756ac2bf2801d9b1e869c = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_8a8f57aaab4d9dd026b38137e8e9dc1e = $(`<div id="html_8a8f57aaab4d9dd026b38137e8e9dc1e" style="width: 100.0%; height: 100.0%;">     <div data-city-key="LISBON / Portugal">       <b>Universidade de Lisboa</b><br>       <small>LISBON</small><br>       <span class="popup-earnings" id="popup-earnings-LISBON___Portugal">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('LISBON / Portugal');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_b1524a80d2a756ac2bf2801d9b1e869c.setContent(html_8a8f57aaab4d9dd026b38137e8e9dc1e);
+            
+        
+
+        circle_marker_5de25be8d4c47ccefdd5669422d97b11.bindPopup(popup_b1524a80d2a756ac2bf2801d9b1e869c)
+        ;
+
+        
+    
+    
+            circle_marker_5de25be8d4c47ccefdd5669422d97b11.bindTooltip(
+                `<div>
+                     LISBON
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_dc3778b13ca83f83b82d46e518b14225 = L.circleMarker(
+                [51.4893335, -0.1440551],
+                {"bubblingMouseEvents": true, "color": "#b32521", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#b32521", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.9226625, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_4377cbed240154f7aa83b029d8896528 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_0121aae05b73f50b0df607081b190b59 = $(`<div id="html_0121aae05b73f50b0df607081b190b59" style="width: 100.0%; height: 100.0%;">     <div data-city-key="LONDON / United Kingdom">       <b>Imperial College London</b><br>       <small>LONDON</small><br>       <span class="popup-earnings" id="popup-earnings-LONDON___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('LONDON / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_4377cbed240154f7aa83b029d8896528.setContent(html_0121aae05b73f50b0df607081b190b59);
+            
+        
+
+        circle_marker_dc3778b13ca83f83b82d46e518b14225.bindPopup(popup_4377cbed240154f7aa83b029d8896528)
+        ;
+
+        
+    
+    
+            circle_marker_dc3778b13ca83f83b82d46e518b14225.bindTooltip(
+                `<div>
+                     LONDON
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_300b9db1ea1be797c4f012173995464f = L.circleMarker(
+                [51.4893335, -0.1440551],
+                {"bubblingMouseEvents": true, "color": "#b32521", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#b32521", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.9226625, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_339800fd44b8b5374d0af5cc0b0d21fb = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e7a56a1b67c1bcf5f0fa6d19baeed9ff = $(`<div id="html_e7a56a1b67c1bcf5f0fa6d19baeed9ff" style="width: 100.0%; height: 100.0%;">     <div data-city-key="LONDON / United Kingdom">       <b>King's College London</b><br>       <small>LONDON</small><br>       <span class="popup-earnings" id="popup-earnings-LONDON___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('LONDON / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_339800fd44b8b5374d0af5cc0b0d21fb.setContent(html_e7a56a1b67c1bcf5f0fa6d19baeed9ff);
+            
+        
+
+        circle_marker_300b9db1ea1be797c4f012173995464f.bindPopup(popup_339800fd44b8b5374d0af5cc0b0d21fb)
+        ;
+
+        
+    
+    
+            circle_marker_300b9db1ea1be797c4f012173995464f.bindTooltip(
+                `<div>
+                     LONDON
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_d24514dcfdbd914caa7abb6afdcbd218 = L.circleMarker(
+                [51.4893335, -0.1440551],
+                {"bubblingMouseEvents": true, "color": "#b32521", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#b32521", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.9226625, "stroke": true, "weight": 3}
+            ).addTo(feature_group_61143ad920f7bc39c168a80b880614b2);
+        
+    
+        var popup_8b609ef696f114b9a97567c1b5e50247 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_c067bdd40d3463154b51ffcd7f759ef6 = $(`<div id="html_c067bdd40d3463154b51ffcd7f759ef6" style="width: 100.0%; height: 100.0%;">     <div data-city-key="LONDON / United Kingdom">       <b>Queen Mary University of London</b><br>       <small>LONDON</small><br>       <span class="popup-earnings" id="popup-earnings-LONDON___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('LONDON / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_8b609ef696f114b9a97567c1b5e50247.setContent(html_c067bdd40d3463154b51ffcd7f759ef6);
+            
+        
+
+        circle_marker_d24514dcfdbd914caa7abb6afdcbd218.bindPopup(popup_8b609ef696f114b9a97567c1b5e50247)
+        ;
+
+        
+    
+    
+            circle_marker_d24514dcfdbd914caa7abb6afdcbd218.bindTooltip(
+                `<div>
+                     LONDON
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            feature_group_61143ad920f7bc39c168a80b880614b2.addTo(map_fbf48a80774e70082c47684d543a652f);
+        
+    
+            var feature_group_4b46db54a09935fc183853fd9d336759 = L.featureGroup(
+                {
+}
+            );
+        
+    
+            var circle_marker_660fe93bd799f9e8bec206c7ce054822 = L.circleMarker(
+                [47.3744489, 8.5410422],
+                {"bubblingMouseEvents": true, "color": "#95c710", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#95c710", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 18.876087400655862, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_b7e634f65394137b54716f8d911a1c2d = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_c0d5485e90fca1cbfee1d0b4ba89c2f6 = $(`<div id="html_c0d5485e90fca1cbfee1d0b4ba89c2f6" style="width: 100.0%; height: 100.0%;">     <div data-city-key="ZURICH / Switzerland">       <b>ETH Zurich</b><br>       <small>ZURICH</small><br>       <span class="popup-earnings" id="popup-earnings-ZURICH___Switzerland">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('ZURICH / Switzerland');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_b7e634f65394137b54716f8d911a1c2d.setContent(html_c0d5485e90fca1cbfee1d0b4ba89c2f6);
+            
+        
+
+        circle_marker_660fe93bd799f9e8bec206c7ce054822.bindPopup(popup_b7e634f65394137b54716f8d911a1c2d)
+        ;
+
+        
+    
+    
+            circle_marker_660fe93bd799f9e8bec206c7ce054822.bindTooltip(
+                `<div>
+                     ZURICH
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_1a336ce2d08e32212e5e7cb377e9bb89 = L.circleMarker(
+                [49.234362, 6.996379],
+                {"bubblingMouseEvents": true, "color": "#66ae17", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#66ae17", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 23.425206093827164, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_b43030254298507d364f95e9700d12d1 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e2928de556da2d233172e2192cfb712e = $(`<div id="html_e2928de556da2d233172e2192cfb712e" style="width: 100.0%; height: 100.0%;">     <div data-city-key="SAARBRUECKEN / Germany">       <b>CISPA Helmholtz Center</b><br>       <small>SAARBRUECKEN</small><br>       <span class="popup-earnings" id="popup-earnings-SAARBRUECKEN___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('SAARBRUECKEN / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_b43030254298507d364f95e9700d12d1.setContent(html_e2928de556da2d233172e2192cfb712e);
+            
+        
+
+        circle_marker_1a336ce2d08e32212e5e7cb377e9bb89.bindPopup(popup_b43030254298507d364f95e9700d12d1)
+        ;
+
+        
+    
+    
+            circle_marker_1a336ce2d08e32212e5e7cb377e9bb89.bindTooltip(
+                `<div>
+                     SAARBRUECKEN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_0967f031bed067c830f9ce014b970af3 = L.circleMarker(
+                [49.234362, 6.996379],
+                {"bubblingMouseEvents": true, "className": "no-public", "color": "#66ae17", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#66ae17", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 23.425206093827164, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_32c4e37619aff503c4d78c02e55f4c2a = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_16fb117784e7bf6c5da0b7c1bc0e9886 = $(`<div id="html_16fb117784e7bf6c5da0b7c1bc0e9886" style="width: 100.0%; height: 100.0%;">     <div data-city-key="SAARBRUCKEN / Germany">       <b>Saarland University</b><br>       <small>SAARBRUCKEN</small><br>       <span class="popup-earnings" id="popup-earnings-SAARBRUCKEN___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('SAARBRUCKEN / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_32c4e37619aff503c4d78c02e55f4c2a.setContent(html_16fb117784e7bf6c5da0b7c1bc0e9886);
+            
+        
+
+        circle_marker_0967f031bed067c830f9ce014b970af3.bindPopup(popup_32c4e37619aff503c4d78c02e55f4c2a)
+        ;
+
+        
+    
+    
+            circle_marker_0967f031bed067c830f9ce014b970af3.bindTooltip(
+                `<div>
+                     SAARBRUCKEN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_09362a583d3da19169e9065217e9d1cd = L.circleMarker(
+                [51.4818111, 7.2196635],
+                {"bubblingMouseEvents": true, "color": "#9aca0f", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#9aca0f", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 18.421515356944443, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_340b9d04292cb460fe70f5d21f642d7b = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_6a57f4ac25fee5677126a2bd174dbc32 = $(`<div id="html_6a57f4ac25fee5677126a2bd174dbc32" style="width: 100.0%; height: 100.0%;">     <div data-city-key="BOCHUM / Germany">       <b>Max Planck Society</b><br>       <small>BOCHUM</small><br>       <span class="popup-earnings" id="popup-earnings-BOCHUM___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('BOCHUM / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_340b9d04292cb460fe70f5d21f642d7b.setContent(html_6a57f4ac25fee5677126a2bd174dbc32);
+            
+        
+
+        circle_marker_09362a583d3da19169e9065217e9d1cd.bindPopup(popup_340b9d04292cb460fe70f5d21f642d7b)
+        ;
+
+        
+    
+    
+            circle_marker_09362a583d3da19169e9065217e9d1cd.bindTooltip(
+                `<div>
+                     BOCHUM
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_c726b30abc535a8387ba64c709b10065 = L.circleMarker(
+                [50.776351, 6.083862],
+                {"bubblingMouseEvents": true, "color": "#a2ce0e", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#a2ce0e", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 17.633834982716046, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_9014dd2ecf4ac64afc1c971833562f89 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_ccd04d27e252ab2a96d91a35bdad4b95 = $(`<div id="html_ccd04d27e252ab2a96d91a35bdad4b95" style="width: 100.0%; height: 100.0%;">     <div data-city-key="AACHEN / Germany">       <b>RWTH Aachen University</b><br>       <small>AACHEN</small><br>       <span class="popup-earnings" id="popup-earnings-AACHEN___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('AACHEN / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_9014dd2ecf4ac64afc1c971833562f89.setContent(html_ccd04d27e252ab2a96d91a35bdad4b95);
+            
+        
+
+        circle_marker_c726b30abc535a8387ba64c709b10065.bindPopup(popup_9014dd2ecf4ac64afc1c971833562f89)
+        ;
+
+        
+    
+    
+            circle_marker_c726b30abc535a8387ba64c709b10065.bindTooltip(
+                `<div>
+                     AACHEN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_600157b496e37b74825ae5b796d1f7b8 = L.circleMarker(
+                [48.30499, 16.323756],
+                {"bubblingMouseEvents": true, "color": "#9fcc0e", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#9fcc0e", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 17.94970821084105, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_8cd8d3a5c0fe6b44f4faa60a9c7a6be3 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_403c5b66de86462c5ceaa5f530b75097 = $(`<div id="html_403c5b66de86462c5ceaa5f530b75097" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Klosterneuburg / Austria">       <b>IST Austria</b><br>       <small>Klosterneuburg</small><br>       <span class="popup-earnings" id="popup-earnings-Klosterneuburg___Austria">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Klosterneuburg / Austria');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_8cd8d3a5c0fe6b44f4faa60a9c7a6be3.setContent(html_403c5b66de86462c5ceaa5f530b75097);
+            
+        
+
+        circle_marker_600157b496e37b74825ae5b796d1f7b8.bindPopup(popup_8cd8d3a5c0fe6b44f4faa60a9c7a6be3)
+        ;
+
+        
+    
+    
+            circle_marker_600157b496e37b74825ae5b796d1f7b8.bindTooltip(
+                `<div>
+                     Klosterneuburg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_34afe7b966009a1a2984b97de873f9c3 = L.circleMarker(
+                [49.7780356, 9.9434769],
+                {"bubblingMouseEvents": true, "color": "#a9d20d", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#a9d20d", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 16.98362596111111, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_731ca87864ad5f71e98e8ac71d3ba3e9 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_be6b8076df4d61ba42960ae231ed7a7f = $(`<div id="html_be6b8076df4d61ba42960ae231ed7a7f" style="width: 100.0%; height: 100.0%;">     <div data-city-key="WURZBURG / Germany">       <b>University of Würzburg</b><br>       <small>WURZBURG</small><br>       <span class="popup-earnings" id="popup-earnings-WURZBURG___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('WURZBURG / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_731ca87864ad5f71e98e8ac71d3ba3e9.setContent(html_be6b8076df4d61ba42960ae231ed7a7f);
+            
+        
+
+        circle_marker_34afe7b966009a1a2984b97de873f9c3.bindPopup(popup_731ca87864ad5f71e98e8ac71d3ba3e9)
+        ;
+
+        
+    
+    
+            circle_marker_34afe7b966009a1a2984b97de873f9c3.bindTooltip(
+                `<div>
+                     WURZBURG
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_e651ae91b710a5cd4ac17db3f3679c81 = L.circleMarker(
+                [46.5218269, 6.6327025],
+                {"bubblingMouseEvents": true, "color": "#c7e108", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#c7e108", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 14.076321478124997, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_c186790c1a82cca195c420bf9957b307 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_8cc35e00b3f15e5bc15de87f515c2644 = $(`<div id="html_8cc35e00b3f15e5bc15de87f515c2644" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Lausanne / Switzerland">       <b>EPFL</b><br>       <small>Lausanne</small><br>       <span class="popup-earnings" id="popup-earnings-Lausanne___Switzerland">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Lausanne / Switzerland');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_c186790c1a82cca195c420bf9957b307.setContent(html_8cc35e00b3f15e5bc15de87f515c2644);
+            
+        
+
+        circle_marker_e651ae91b710a5cd4ac17db3f3679c81.bindPopup(popup_c186790c1a82cca195c420bf9957b307)
+        ;
+
+        
+    
+    
+            circle_marker_e651ae91b710a5cd4ac17db3f3679c81.bindTooltip(
+                `<div>
+                     Lausanne
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_2b4b21059eb95f28ac7953c2b0f7c5e2 = L.circleMarker(
+                [53.866444, 10.684738],
+                {"bubblingMouseEvents": true, "className": "no-public", "color": "#9ccb0f", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#9ccb0f", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 18.26288279521605, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_e74ca0ca72fff0e6baf520646f9f27a5 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e6c36719c108b36dc0c250ffea521299 = $(`<div id="html_e6c36719c108b36dc0c250ffea521299" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Lübeck / Germany">       <b>University of Lübeck</b><br>       <small>Lübeck</small><br>       <span class="popup-earnings" id="popup-earnings-L_beck___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Lübeck / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_e74ca0ca72fff0e6baf520646f9f27a5.setContent(html_e6c36719c108b36dc0c250ffea521299);
+            
+        
+
+        circle_marker_2b4b21059eb95f28ac7953c2b0f7c5e2.bindPopup(popup_e74ca0ca72fff0e6baf520646f9f27a5)
+        ;
+
+        
+    
+    
+            circle_marker_2b4b21059eb95f28ac7953c2b0f7c5e2.bindTooltip(
+                `<div>
+                     Lübeck
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_d3b621e825972baaf7df1623735f1ecb = L.circleMarker(
+                [47.0708678, 15.4382786],
+                {"bubblingMouseEvents": true, "color": "#bedd09", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#bedd09", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 14.92229867669753, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_145fd920bc1e83090fbae2de42f2e643 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_966bf0c2140c8ee86057071af5ff6777 = $(`<div id="html_966bf0c2140c8ee86057071af5ff6777" style="width: 100.0%; height: 100.0%;">     <div data-city-key="GRAZ / Austria">       <b>Graz University of Technology</b><br>       <small>GRAZ</small><br>       <span class="popup-earnings" id="popup-earnings-GRAZ___Austria">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('GRAZ / Austria');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_145fd920bc1e83090fbae2de42f2e643.setContent(html_966bf0c2140c8ee86057071af5ff6777);
+            
+        
+
+        circle_marker_d3b621e825972baaf7df1623735f1ecb.bindPopup(popup_145fd920bc1e83090fbae2de42f2e643)
+        ;
+
+        
+    
+    
+            circle_marker_d3b621e825972baaf7df1623735f1ecb.bindTooltip(
+                `<div>
+                     GRAZ
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f44c8ddfcd8b71862c53a34c17180fea = L.circleMarker(
+                [49.872775, 8.651177],
+                {"bubblingMouseEvents": true, "color": "#b6d80b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#b6d80b", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 15.712657702623456, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_6762d0dabc8c30289b0a60530b675bd7 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_f28b9d639b308867eb3653d3df58e39e = $(`<div id="html_f28b9d639b308867eb3653d3df58e39e" style="width: 100.0%; height: 100.0%;">     <div data-city-key="DARMSTADT / Germany">       <b>TU Darmstadt</b><br>       <small>DARMSTADT</small><br>       <span class="popup-earnings" id="popup-earnings-DARMSTADT___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('DARMSTADT / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_6762d0dabc8c30289b0a60530b675bd7.setContent(html_f28b9d639b308867eb3653d3df58e39e);
+            
+        
+
+        circle_marker_f44c8ddfcd8b71862c53a34c17180fea.bindPopup(popup_6762d0dabc8c30289b0a60530b675bd7)
+        ;
+
+        
+    
+    
+            circle_marker_f44c8ddfcd8b71862c53a34c17180fea.bindTooltip(
+                `<div>
+                     DARMSTADT
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f808ae18ab19627c81fc280292a86b87 = L.circleMarker(
+                [48.5203263, 9.053596],
+                {"bubblingMouseEvents": true, "color": "#d3e806", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#d3e806", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 12.90503403595679, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_a5c061afc22e4edea1bf74837c9e9c5a = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_29e2f44e1e69592e143df6fb74c9d60c = $(`<div id="html_29e2f44e1e69592e143df6fb74c9d60c" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Tübingen / Germany">       <b>University of Tübingen</b><br>       <small>Tübingen</small><br>       <span class="popup-earnings" id="popup-earnings-T_bingen___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Tübingen / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_a5c061afc22e4edea1bf74837c9e9c5a.setContent(html_29e2f44e1e69592e143df6fb74c9d60c);
+            
+        
+
+        circle_marker_f808ae18ab19627c81fc280292a86b87.bindPopup(popup_a5c061afc22e4edea1bf74837c9e9c5a)
+        ;
+
+        
+    
+    
+            circle_marker_f808ae18ab19627c81fc280292a86b87.bindTooltip(
+                `<div>
+                     Tübingen
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_8fa41e7be237b6c353452baaddbde2e4 = L.circleMarker(
+                [52.5173885, 13.3951309],
+                {"bubblingMouseEvents": true, "color": "#deee04", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#deee04", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.862169553433642, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_9210b1bf1d6ece031e6ba736e69e0585 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_4c46691f647bd949731dc5d2c8ec59e7 = $(`<div id="html_4c46691f647bd949731dc5d2c8ec59e7" style="width: 100.0%; height: 100.0%;">     <div data-city-key="BERLIN / Germany">       <b>TU Berlin</b><br>       <small>BERLIN</small><br>       <span class="popup-earnings" id="popup-earnings-BERLIN___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('BERLIN / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_9210b1bf1d6ece031e6ba736e69e0585.setContent(html_4c46691f647bd949731dc5d2c8ec59e7);
+            
+        
+
+        circle_marker_8fa41e7be237b6c353452baaddbde2e4.bindPopup(popup_9210b1bf1d6ece031e6ba736e69e0585)
+        ;
+
+        
+    
+    
+            circle_marker_8fa41e7be237b6c353452baaddbde2e4.bindTooltip(
+                `<div>
+                     BERLIN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_b8e3d3f10a2064cfa65065e07107e49b = L.circleMarker(
+                [57.0462626, 9.9215263],
+                {"bubblingMouseEvents": true, "color": "#e9f303", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e9f303", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.811641128549383, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_d097db38b310a3f5c599c622a85de270 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_61e83b67f6a93ba3e6842c7a4b02c78b = $(`<div id="html_61e83b67f6a93ba3e6842c7a4b02c78b" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Aalborg / Denmark">       <b>Aalborg University</b><br>       <small>Aalborg</small><br>       <span class="popup-earnings" id="popup-earnings-Aalborg___Denmark">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Aalborg / Denmark');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_d097db38b310a3f5c599c622a85de270.setContent(html_61e83b67f6a93ba3e6842c7a4b02c78b);
+            
+        
+
+        circle_marker_b8e3d3f10a2064cfa65065e07107e49b.bindPopup(popup_d097db38b310a3f5c599c622a85de270)
+        ;
+
+        
+    
+    
+            circle_marker_b8e3d3f10a2064cfa65065e07107e49b.bindTooltip(
+                `<div>
+                     Aalborg
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_0c72531993f6ee5acf455532b8ed9e1a = L.circleMarker(
+                [48.1371079, 11.5753822],
+                {"bubblingMouseEvents": true, "color": "#f9fc00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f9fc00", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 9.281418048804012, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_f5044fb80d4ff04e132b1eb3694e9890 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_339ff98ff6cd65cf2f26915321b777e2 = $(`<div id="html_339ff98ff6cd65cf2f26915321b777e2" style="width: 100.0%; height: 100.0%;">     <div data-city-key="MUNICH / Germany">       <b>TU Munich</b><br>       <small>MUNICH</small><br>       <span class="popup-earnings" id="popup-earnings-MUNICH___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('MUNICH / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_f5044fb80d4ff04e132b1eb3694e9890.setContent(html_339ff98ff6cd65cf2f26915321b777e2);
+            
+        
+
+        circle_marker_0c72531993f6ee5acf455532b8ed9e1a.bindPopup(popup_f5044fb80d4ff04e132b1eb3694e9890)
+        ;
+
+        
+    
+    
+            circle_marker_0c72531993f6ee5acf455532b8ed9e1a.bindTooltip(
+                `<div>
+                     MUNICH
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_17a09459f0549dc904fcb79ef5e46a46 = L.circleMarker(
+                [48.1371079, 11.5753822],
+                {"bubblingMouseEvents": true, "color": "#f9fc00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f9fc00", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 9.281418048804012, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_c5652c23051b05c9bc95082a71623bb9 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_cec9ca448d85e7a9a1ed497f726211b0 = $(`<div id="html_cec9ca448d85e7a9a1ed497f726211b0" style="width: 100.0%; height: 100.0%;">     <div data-city-key="MUNICH / Germany">       <b>LMU Munich</b><br>       <small>MUNICH</small><br>       <span class="popup-earnings" id="popup-earnings-MUNICH___Germany">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('MUNICH / Germany');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_c5652c23051b05c9bc95082a71623bb9.setContent(html_cec9ca448d85e7a9a1ed497f726211b0);
+            
+        
+
+        circle_marker_17a09459f0549dc904fcb79ef5e46a46.bindPopup(popup_c5652c23051b05c9bc95082a71623bb9)
+        ;
+
+        
+    
+    
+            circle_marker_17a09459f0549dc904fcb79ef5e46a46.bindTooltip(
+                `<div>
+                     MUNICH
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_cc5a6e4152e44ae9b293518441d551d2 = L.circleMarker(
+                [48.2083537, 16.3725042],
+                {"bubblingMouseEvents": true, "color": "#fafc00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fafc00", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 9.22466046558642, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_763e311d6ff89ed2bed760ccfb9ae4bc = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_05b26d5a32ecf4b6802ea4648d51ff8c = $(`<div id="html_05b26d5a32ecf4b6802ea4648d51ff8c" style="width: 100.0%; height: 100.0%;">     <div data-city-key="WIEN / Austria">       <b>TU Wien</b><br>       <small>WIEN</small><br>       <span class="popup-earnings" id="popup-earnings-WIEN___Austria">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('WIEN / Austria');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_763e311d6ff89ed2bed760ccfb9ae4bc.setContent(html_05b26d5a32ecf4b6802ea4648d51ff8c);
+            
+        
+
+        circle_marker_cc5a6e4152e44ae9b293518441d551d2.bindPopup(popup_763e311d6ff89ed2bed760ccfb9ae4bc)
+        ;
+
+        
+    
+    
+            circle_marker_cc5a6e4152e44ae9b293518441d551d2.bindTooltip(
+                `<div>
+                     WIEN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_12f2a0c7ea82c2177add7fe58a877824 = L.circleMarker(
+                [55.6867243, 12.5700724],
+                {"bubblingMouseEvents": true, "color": "#f79703", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f79703", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.5598375, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_f7ba0bc30bd6dc72dcefab6a984fbfd7 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_a8909021ecf17eba5d812500444c045a = $(`<div id="html_a8909021ecf17eba5d812500444c045a" style="width: 100.0%; height: 100.0%;">     <div data-city-key="COPENHAGEN / Denmark">       <b>University of Copenhagen</b><br>       <small>COPENHAGEN</small><br>       <span class="popup-earnings" id="popup-earnings-COPENHAGEN___Denmark">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('COPENHAGEN / Denmark');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_f7ba0bc30bd6dc72dcefab6a984fbfd7.setContent(html_a8909021ecf17eba5d812500444c045a);
+            
+        
+
+        circle_marker_12f2a0c7ea82c2177add7fe58a877824.bindPopup(popup_f7ba0bc30bd6dc72dcefab6a984fbfd7)
+        ;
+
+        
+    
+    
+            circle_marker_12f2a0c7ea82c2177add7fe58a877824.bindTooltip(
+                `<div>
+                     COPENHAGEN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_127ba533b87da208b4bebf85bf8cf5c0 = L.circleMarker(
+                [52.0114017, 4.35839],
+                {"bubblingMouseEvents": true, "color": "#fefe00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fefe00", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.825863828125, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_dbcda9baa09e730637f44cb348e97f5e = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_a0d62fe756fcac4de4a9d61c6600edc4 = $(`<div id="html_a0d62fe756fcac4de4a9d61c6600edc4" style="width: 100.0%; height: 100.0%;">     <div data-city-key="DELFT / Netherlands">       <b>TU Delft</b><br>       <small>DELFT</small><br>       <span class="popup-earnings" id="popup-earnings-DELFT___Netherlands">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('DELFT / Netherlands');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_dbcda9baa09e730637f44cb348e97f5e.setContent(html_a0d62fe756fcac4de4a9d61c6600edc4);
+            
+        
+
+        circle_marker_127ba533b87da208b4bebf85bf8cf5c0.bindPopup(popup_dbcda9baa09e730637f44cb348e97f5e)
+        ;
+
+        
+    
+    
+            circle_marker_127ba533b87da208b4bebf85bf8cf5c0.bindTooltip(
+                `<div>
+                     DELFT
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_15be4f3fb6956e19ef23fed503b4766e = L.circleMarker(
+                [53.3806626, -1.4702278],
+                {"bubblingMouseEvents": true, "color": "#fdfe00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fdfe00", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.879248169290124, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_2e7605e206f14b0085c311e61cbf03c6 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_3f8f9c0558be9fb884681ccc8d316d63 = $(`<div id="html_3f8f9c0558be9fb884681ccc8d316d63" style="width: 100.0%; height: 100.0%;">     <div data-city-key="SHEFFIELD / United Kingdom">       <b>University of Sheffield</b><br>       <small>SHEFFIELD</small><br>       <span class="popup-earnings" id="popup-earnings-SHEFFIELD___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('SHEFFIELD / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_2e7605e206f14b0085c311e61cbf03c6.setContent(html_3f8f9c0558be9fb884681ccc8d316d63);
+            
+        
+
+        circle_marker_15be4f3fb6956e19ef23fed503b4766e.bindPopup(popup_2e7605e206f14b0085c311e61cbf03c6)
+        ;
+
+        
+    
+    
+            circle_marker_15be4f3fb6956e19ef23fed503b4766e.bindTooltip(
+                `<div>
+                     SHEFFIELD
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_5053fece007328094841dda1a55ce550 = L.circleMarker(
+                [52.4081812, -1.510477],
+                {"bubblingMouseEvents": true, "color": "#f28f05", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f28f05", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.43723125, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_0e95710c6a44009e3c559666807a15d9 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_425a6c5691679204bf3b0e0d6b8ad330 = $(`<div id="html_425a6c5691679204bf3b0e0d6b8ad330" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Coventry / United Kingdom">       <b>University of Warwick</b><br>       <small>Coventry</small><br>       <span class="popup-earnings" id="popup-earnings-Coventry___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Coventry / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_0e95710c6a44009e3c559666807a15d9.setContent(html_425a6c5691679204bf3b0e0d6b8ad330);
+            
+        
+
+        circle_marker_5053fece007328094841dda1a55ce550.bindPopup(popup_0e95710c6a44009e3c559666807a15d9)
+        ;
+
+        
+    
+    
+            circle_marker_5053fece007328094841dda1a55ce550.bindTooltip(
+                `<div>
+                     Coventry
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_8710516948e534e98f12eed8a6d891af = L.circleMarker(
+                [54.0488219, -2.8013499],
+                {"bubblingMouseEvents": true, "color": "#f69603", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f69603", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.548718749999999, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_aa0715f61b0001b605dd49a37e5d6b73 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_4500d1ad261af95681b80e2208e1b411 = $(`<div id="html_4500d1ad261af95681b80e2208e1b411" style="width: 100.0%; height: 100.0%;">     <div data-city-key="LANCASTER / United Kingdom">       <b>Lancaster University</b><br>       <small>LANCASTER</small><br>       <span class="popup-earnings" id="popup-earnings-LANCASTER___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('LANCASTER / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_aa0715f61b0001b605dd49a37e5d6b73.setContent(html_4500d1ad261af95681b80e2208e1b411);
+            
+        
+
+        circle_marker_8710516948e534e98f12eed8a6d891af.bindPopup(popup_aa0715f61b0001b605dd49a37e5d6b73)
+        ;
+
+        
+    
+    
+            circle_marker_8710516948e534e98f12eed8a6d891af.bindTooltip(
+                `<div>
+                     LANCASTER
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_2b32b8199527858b05b8f83d9bf498dc = L.circleMarker(
+                [52.4796992, -1.9026911],
+                {"bubblingMouseEvents": true, "color": "#f59404", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f59404", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.515925, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_f75a0a7064091fa17fa85df91e466856 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_51909e8ce89135cc771877cb70009a69 = $(`<div id="html_51909e8ce89135cc771877cb70009a69" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Birmingham / United Kingdom">       <b>University of Birmingham</b><br>       <small>Birmingham</small><br>       <span class="popup-earnings" id="popup-earnings-Birmingham___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Birmingham / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_f75a0a7064091fa17fa85df91e466856.setContent(html_51909e8ce89135cc771877cb70009a69);
+            
+        
+
+        circle_marker_2b32b8199527858b05b8f83d9bf498dc.bindPopup(popup_f75a0a7064091fa17fa85df91e466856)
+        ;
+
+        
+    
+    
+            circle_marker_2b32b8199527858b05b8f83d9bf498dc.bindTooltip(
+                `<div>
+                     Birmingham
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_0f6d3180026072609cf436a1569d84fc = L.circleMarker(
+                [51.4816546, -3.1791934],
+                {"bubblingMouseEvents": true, "color": "#f89a02", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f89a02", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.59595, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_576c3f526b4a8bb840e380fb8e7fb124 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e383849c0813b65b88f75ea159639030 = $(`<div id="html_e383849c0813b65b88f75ea159639030" style="width: 100.0%; height: 100.0%;">     <div data-city-key="CARDIFF / United Kingdom">       <b>Cardiff University</b><br>       <small>CARDIFF</small><br>       <span class="popup-earnings" id="popup-earnings-CARDIFF___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('CARDIFF / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_576c3f526b4a8bb840e380fb8e7fb124.setContent(html_e383849c0813b65b88f75ea159639030);
+            
+        
+
+        circle_marker_0f6d3180026072609cf436a1569d84fc.bindPopup(popup_576c3f526b4a8bb840e380fb8e7fb124)
+        ;
+
+        
+    
+    
+            circle_marker_0f6d3180026072609cf436a1569d84fc.bindTooltip(
+                `<div>
+                     CARDIFF
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_b512b6843b2b0f72b350d79f97d2ffb2 = L.circleMarker(
+                [55.9533456, -3.1883749],
+                {"bubblingMouseEvents": true, "color": "#e2740c", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e2740c", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.05581875, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_2241a4cdd075a8d6a14625d2097272b7 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e0b388106e2885b69a68c0f359c8f7cf = $(`<div id="html_e0b388106e2885b69a68c0f359c8f7cf" style="width: 100.0%; height: 100.0%;">     <div data-city-key="EDINBURGH / United Kingdom">       <b>University of Edinburgh</b><br>       <small>EDINBURGH</small><br>       <span class="popup-earnings" id="popup-earnings-EDINBURGH___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('EDINBURGH / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_2241a4cdd075a8d6a14625d2097272b7.setContent(html_e0b388106e2885b69a68c0f359c8f7cf);
+            
+        
+
+        circle_marker_b512b6843b2b0f72b350d79f97d2ffb2.bindPopup(popup_2241a4cdd075a8d6a14625d2097272b7)
+        ;
+
+        
+    
+    
+            circle_marker_b512b6843b2b0f72b350d79f97d2ffb2.bindTooltip(
+                `<div>
+                     EDINBURGH
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_7f34e0d02af761e2f4d35821df916dd9 = L.circleMarker(
+                [53.4794892, -2.2451148],
+                {"bubblingMouseEvents": true, "color": "#e0710d", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e0710d", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.013275, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_66c96740d36b3c6ed37d619d817da333 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_a82d9a2af1f4a8a231e0833ec2fbd729 = $(`<div id="html_a82d9a2af1f4a8a231e0833ec2fbd729" style="width: 100.0%; height: 100.0%;">     <div data-city-key="MANCHESTER / United Kingdom">       <b>University of Manchester</b><br>       <small>MANCHESTER</small><br>       <span class="popup-earnings" id="popup-earnings-MANCHESTER___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('MANCHESTER / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_66c96740d36b3c6ed37d619d817da333.setContent(html_a82d9a2af1f4a8a231e0833ec2fbd729);
+            
+        
+
+        circle_marker_7f34e0d02af761e2f4d35821df916dd9.bindPopup(popup_66c96740d36b3c6ed37d619d817da333)
+        ;
+
+        
+    
+    
+            circle_marker_7f34e0d02af761e2f4d35821df916dd9.bindTooltip(
+                `<div>
+                     MANCHESTER
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f708ac8a3d75d462da91285e04862839 = L.circleMarker(
+                [52.3730796, 4.8924534],
+                {"bubblingMouseEvents": true, "color": "#c94917", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#c94917", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.44573125, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_b01fe494b77ce9c689b799d4f31f7878 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_47cbdc9e6f67f454d4cf8994057eeffc = $(`<div id="html_47cbdc9e6f67f454d4cf8994057eeffc" style="width: 100.0%; height: 100.0%;">     <div data-city-key="AMSTERDAM / Netherlands">       <b>University of Amsterdam</b><br>       <small>AMSTERDAM</small><br>       <span class="popup-earnings" id="popup-earnings-AMSTERDAM___Netherlands">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('AMSTERDAM / Netherlands');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_b01fe494b77ce9c689b799d4f31f7878.setContent(html_47cbdc9e6f67f454d4cf8994057eeffc);
+            
+        
+
+        circle_marker_f708ac8a3d75d462da91285e04862839.bindPopup(popup_b01fe494b77ce9c689b799d4f31f7878)
+        ;
+
+        
+    
+    
+            circle_marker_f708ac8a3d75d462da91285e04862839.bindTooltip(
+                `<div>
+                     AMSTERDAM
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_2b5df49ae11c2578d5e368675573b76e = L.circleMarker(
+                [51.2356068, -0.5732063],
+                {"bubblingMouseEvents": true, "color": "#d76111", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#d76111", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.7801, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_95fb70b06fc8a438980927dfc4e1fed9 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_2bdcb782008d02061fec650449b6b0ab = $(`<div id="html_2bdcb782008d02061fec650449b6b0ab" style="width: 100.0%; height: 100.0%;">     <div data-city-key="Guildford / United Kingdom">       <b>University of Surrey</b><br>       <small>Guildford</small><br>       <span class="popup-earnings" id="popup-earnings-Guildford___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('Guildford / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_95fb70b06fc8a438980927dfc4e1fed9.setContent(html_2bdcb782008d02061fec650449b6b0ab);
+            
+        
+
+        circle_marker_2b5df49ae11c2578d5e368675573b76e.bindPopup(popup_95fb70b06fc8a438980927dfc4e1fed9)
+        ;
+
+        
+    
+    
+            circle_marker_2b5df49ae11c2578d5e368675573b76e.bindTooltip(
+                `<div>
+                     Guildford
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_02abbd7a5c64e3e85914bc18b870708f = L.circleMarker(
+                [52.2055314, 0.1186637],
+                {"bubblingMouseEvents": true, "className": "no-public", "color": "#cd5015", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#cd5015", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.54686875, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_6be085a5cc8a95a69142265dc6c61897 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_7f21efb6c5626d6b96cd73370a6eee53 = $(`<div id="html_7f21efb6c5626d6b96cd73370a6eee53" style="width: 100.0%; height: 100.0%;">     <div data-city-key="CAMBRIDGE / United Kingdom">       <b>University of Cambridge</b><br>       <small>CAMBRIDGE</small><br>       <span class="popup-earnings" id="popup-earnings-CAMBRIDGE___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('CAMBRIDGE / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_6be085a5cc8a95a69142265dc6c61897.setContent(html_7f21efb6c5626d6b96cd73370a6eee53);
+            
+        
+
+        circle_marker_02abbd7a5c64e3e85914bc18b870708f.bindPopup(popup_6be085a5cc8a95a69142265dc6c61897)
+        ;
+
+        
+    
+    
+            circle_marker_02abbd7a5c64e3e85914bc18b870708f.bindTooltip(
+                `<div>
+                     CAMBRIDGE
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_90bc8115a2ee60f17b036b86e09debb9 = L.circleMarker(
+                [51.7520131, -1.2578499],
+                {"bubblingMouseEvents": true, "color": "#b72c1f", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#b72c1f", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.0199750000000005, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_3fd2e694680a765a5ff0ba38ec7715cc = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e9d57d2cec22eef24f58008e2d106976 = $(`<div id="html_e9d57d2cec22eef24f58008e2d106976" style="width: 100.0%; height: 100.0%;">     <div data-city-key="OXFORD / United Kingdom">       <b>University of Oxford</b><br>       <small>OXFORD</small><br>       <span class="popup-earnings" id="popup-earnings-OXFORD___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('OXFORD / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_3fd2e694680a765a5ff0ba38ec7715cc.setContent(html_e9d57d2cec22eef24f58008e2d106976);
+            
+        
+
+        circle_marker_90bc8115a2ee60f17b036b86e09debb9.bindPopup(popup_3fd2e694680a765a5ff0ba38ec7715cc)
+        ;
+
+        
+    
+    
+            circle_marker_90bc8115a2ee60f17b036b86e09debb9.bindTooltip(
+                `<div>
+                     OXFORD
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_4efb0b5ceced401482119f5bd21a1fa5 = L.circleMarker(
+                [45.4641943, 9.1896346],
+                {"bubblingMouseEvents": true, "color": "#b22222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#b22222", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.875, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_9502698934af197fbc6c63035d34a1ef = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_99bbe8adcb14e29ee337d5cb9b7c4553 = $(`<div id="html_99bbe8adcb14e29ee337d5cb9b7c4553" style="width: 100.0%; height: 100.0%;">     <div data-city-key="MILAN / Italy">       <b>Politecnico di Milano</b><br>       <small>MILAN</small><br>       <span class="popup-earnings" id="popup-earnings-MILAN___Italy">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('MILAN / Italy');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_9502698934af197fbc6c63035d34a1ef.setContent(html_99bbe8adcb14e29ee337d5cb9b7c4553);
+            
+        
+
+        circle_marker_4efb0b5ceced401482119f5bd21a1fa5.bindPopup(popup_9502698934af197fbc6c63035d34a1ef)
+        ;
+
+        
+    
+    
+            circle_marker_4efb0b5ceced401482119f5bd21a1fa5.bindTooltip(
+                `<div>
+                     MILAN
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f9cca9c1ce85b27a577ab8f35f3b77fc = L.circleMarker(
+                [46.1029536, 11.1297425],
+                {"bubblingMouseEvents": true, "color": "#bc341d", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#bc341d", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.13665625, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_3056da8af5e21db649192d0ded668522 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_d2c369bd45f5c54a9eccd1582cbac4c7 = $(`<div id="html_d2c369bd45f5c54a9eccd1582cbac4c7" style="width: 100.0%; height: 100.0%;">     <div data-city-key="TRENTO / Italy">       <b>University of Trento</b><br>       <small>TRENTO</small><br>       <span class="popup-earnings" id="popup-earnings-TRENTO___Italy">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('TRENTO / Italy');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_3056da8af5e21db649192d0ded668522.setContent(html_d2c369bd45f5c54a9eccd1582cbac4c7);
+            
+        
+
+        circle_marker_f9cca9c1ce85b27a577ab8f35f3b77fc.bindPopup(popup_3056da8af5e21db649192d0ded668522)
+        ;
+
+        
+    
+    
+            circle_marker_f9cca9c1ce85b27a577ab8f35f3b77fc.bindTooltip(
+                `<div>
+                     TRENTO
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_846e67e35c67cadba957ce511b6a35d8 = L.circleMarker(
+                [41.8933203, 12.4829321],
+                {"bubblingMouseEvents": true, "color": "#b22222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#b22222", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.875, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_02a212138ff29c2ff10019ae862bfc32 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_059c11a74d8681118208a9648e79c339 = $(`<div id="html_059c11a74d8681118208a9648e79c339" style="width: 100.0%; height: 100.0%;">     <div data-city-key="ROME / Italy">       <b>Sapienza University of Rome</b><br>       <small>ROME</small><br>       <span class="popup-earnings" id="popup-earnings-ROME___Italy">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('ROME / Italy');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_02a212138ff29c2ff10019ae862bfc32.setContent(html_059c11a74d8681118208a9648e79c339);
+            
+        
+
+        circle_marker_846e67e35c67cadba957ce511b6a35d8.bindPopup(popup_02a212138ff29c2ff10019ae862bfc32)
+        ;
+
+        
+    
+    
+            circle_marker_846e67e35c67cadba957ce511b6a35d8.bindTooltip(
+                `<div>
+                     ROME
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a1761a88bbc01e858f97764b5c0f2edb = L.circleMarker(
+                [38.7077507, -9.1365919],
+                {"bubblingMouseEvents": true, "className": "no-public", "color": "#b22222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#b22222", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.875, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_7ecaee333183ded2b8d7cef19285e819 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_96049acf3292f55b1ef7cd5ee069b607 = $(`<div id="html_96049acf3292f55b1ef7cd5ee069b607" style="width: 100.0%; height: 100.0%;">     <div data-city-key="LISBON / Portugal">       <b>Universidade de Lisboa</b><br>       <small>LISBON</small><br>       <span class="popup-earnings" id="popup-earnings-LISBON___Portugal">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('LISBON / Portugal');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_7ecaee333183ded2b8d7cef19285e819.setContent(html_96049acf3292f55b1ef7cd5ee069b607);
+            
+        
+
+        circle_marker_a1761a88bbc01e858f97764b5c0f2edb.bindPopup(popup_7ecaee333183ded2b8d7cef19285e819)
+        ;
+
+        
+    
+    
+            circle_marker_a1761a88bbc01e858f97764b5c0f2edb.bindTooltip(
+                `<div>
+                     LISBON
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_0a4a06c87cc3cd51be8667278a2657cf = L.circleMarker(
+                [51.4893335, -0.1440551],
+                {"bubblingMouseEvents": true, "color": "#b22222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#b22222", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.875, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_426ed35db72d308ddd2602a8cd12163f = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_ecc3c6ab117992abc2269132795529b9 = $(`<div id="html_ecc3c6ab117992abc2269132795529b9" style="width: 100.0%; height: 100.0%;">     <div data-city-key="LONDON / United Kingdom">       <b>Imperial College London</b><br>       <small>LONDON</small><br>       <span class="popup-earnings" id="popup-earnings-LONDON___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('LONDON / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_426ed35db72d308ddd2602a8cd12163f.setContent(html_ecc3c6ab117992abc2269132795529b9);
+            
+        
+
+        circle_marker_0a4a06c87cc3cd51be8667278a2657cf.bindPopup(popup_426ed35db72d308ddd2602a8cd12163f)
+        ;
+
+        
+    
+    
+            circle_marker_0a4a06c87cc3cd51be8667278a2657cf.bindTooltip(
+                `<div>
+                     LONDON
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_ca74b51e721e7342b8823424f9bec085 = L.circleMarker(
+                [51.4893335, -0.1440551],
+                {"bubblingMouseEvents": true, "color": "#b22222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#b22222", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.875, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_b8f6a11a841b6615359f182d6e743578 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_91c0a9b7ec975e000a12ab9405d0f432 = $(`<div id="html_91c0a9b7ec975e000a12ab9405d0f432" style="width: 100.0%; height: 100.0%;">     <div data-city-key="LONDON / United Kingdom">       <b>King's College London</b><br>       <small>LONDON</small><br>       <span class="popup-earnings" id="popup-earnings-LONDON___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('LONDON / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_b8f6a11a841b6615359f182d6e743578.setContent(html_91c0a9b7ec975e000a12ab9405d0f432);
+            
+        
+
+        circle_marker_ca74b51e721e7342b8823424f9bec085.bindPopup(popup_b8f6a11a841b6615359f182d6e743578)
+        ;
+
+        
+    
+    
+            circle_marker_ca74b51e721e7342b8823424f9bec085.bindTooltip(
+                `<div>
+                     LONDON
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_73e09aab20883edbcac9924cecd2290b = L.circleMarker(
+                [51.4893335, -0.1440551],
+                {"bubblingMouseEvents": true, "color": "#b22222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#b22222", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.875, "stroke": true, "weight": 3}
+            ).addTo(feature_group_4b46db54a09935fc183853fd9d336759);
+        
+    
+        var popup_62e0eabdf06fcc7a7ab4d831dbe1f453 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_cd96ba332b1d08c359f2c21eca2493e3 = $(`<div id="html_cd96ba332b1d08c359f2c21eca2493e3" style="width: 100.0%; height: 100.0%;">     <div data-city-key="LONDON / United Kingdom">       <b>Queen Mary University of London</b><br>       <small>LONDON</small><br>       <span class="popup-earnings" id="popup-earnings-LONDON___United_Kingdom">Monthly earnings: N/A</span><br>       <a href="#" onclick="showSidebar('LONDON / United Kingdom');return false;">Show details</a>     </div>     </div>`)[0];
+                popup_62e0eabdf06fcc7a7ab4d831dbe1f453.setContent(html_cd96ba332b1d08c359f2c21eca2493e3);
+            
+        
+
+        circle_marker_73e09aab20883edbcac9924cecd2290b.bindPopup(popup_62e0eabdf06fcc7a7ab4d831dbe1f453)
+        ;
+
+        
+    
+    
+            circle_marker_73e09aab20883edbcac9924cecd2290b.bindTooltip(
+                `<div>
+                     LONDON
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+</script>
+</html>
